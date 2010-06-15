@@ -1,9 +1,8 @@
-color cyan/blue white/blue
 default 0
 timeout 10
 gfxmenu (hd0,0)/boot/message
 
-title Selected image to install
+title Select image to install
  root (hd0,0)
  kernel /boot/linux.vmx vga=0x314 loader=grub splash=silent  showopts server=berg.suse.de:/data_build dir=image image=ask
  initrd /boot/initrd.vmx

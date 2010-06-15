@@ -1,52 +1,45 @@
 #!/bin/bash
-#================
-# FILE          : config.sh
-#----------------
-# PROJECT       : OpenSuSE KIWI Image System
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
-#               :
-# AUTHOR        : Marcus Schaefer <ms@suse.de>
-#               :
-# BELONGS TO    : Operating System images
-#               :
-# DESCRIPTION   : configuration script for SUSE based
-#               : operating systems
-#               :
-#               :
-# STATUS        : BETA
-#----------------
-#======================================
-# Functions...
-#--------------------------------------
 test -f /.kconfig && . /.kconfig
 test -f /.profile && . /.profile
 
 # kiwi doesn't copy /.kconfig from source to build dir
 test -f /kconfig && . /kconfig 
+rm /kconfig
 
 echo "Configure image: [$name]..."
 
-echo "** Running suseConfig..."
 suseConfig
-
-echo "** Running ldconfig..."
 /sbin/ldconfig
-
-echo "** Running baseCleanMount..."
 baseCleanMount
-
-echo "** Removing kconfig..."
-rm /kconfig
 
 sed --in-place -e 's/# solver.onlyRequires.*/solver.onlyRequires = true/' /etc/zypp/zypp.conf
 
 # Enable sshd
 chkconfig sshd on
-chown root:root /build-custom
-chmod +x /build-custom
-# run custom build_script after build
-/build-custom
+
 mkdir /studio
 cp /image/.profile /studio/profile
 cp /image/config.xml /studio/config.xml
+
+
+# The 'kiwi_type' variable will contain the format of the appliance (oem =
+# disk image, vmx = VMware, iso = CD/DVD, xen = Xen).
+
+# Remove all documentation
+docfiles=`find /usr/share/doc/packages -type f |grep -iv "copying\|license\|copyright"`
+rm -f $docfiles
+rm -rf /usr/share/info
+rm -rf /usr/share/man
+
+rm -rf /var/adm/backup/rpmdb/Packages-*
+rm /var/log/zypper.log
+
+# /usr/share/vim:24M /usr/share/cracklib
+rm -rf /usr/share/locale /usr/share/doc /usr/lib/locale
+
+
+# Addapt bootloader config
+sed -i -e 's/ showopts/ showopts server=berg.suse.de:\/data_build dir=image image=ask/' /etc/sysconfig/bootloader
+sed -i -e 's/ ide=nodma/ dialog=false ide=nodma/' /etc/sysconfig/bootloader
+
 true

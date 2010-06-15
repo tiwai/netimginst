@@ -126,6 +126,7 @@
 <!--    <package name='licenses'/> -->
     <package name="login"/>
     <package name="logrotate"/>
+    <package name="mdadm"/>
     <package name="mingetty"/>
 <!--    <package name='mkinitrd'/> -->
     <package name="module-init-tools"/>
