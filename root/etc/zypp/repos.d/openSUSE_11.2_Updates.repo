@@ -1,0 +1,7 @@
+[openSUSE_11.2_Updates]
+name=openSUSE_11.2_Updates
+baseurl=http://download.opensuse.org/update/11.2
+type=rpm-md
+enabled=1
+autorefresh=1
+gpgcheck=1

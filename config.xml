@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="3.7" name="Network_Image_Installer">
+  <description type="system">
+    <author>Matthias Hopf</author>
+    <contact>studio-devel@suse.de</contact>
+    <specification>Tiny, minimalistic appliances</specification>
+  </description>
+  <preferences>
+<!--    <oem-swapsize>512</oem-swapsize> -->
+    <oem-home>false</oem-home>
+    <oem-boot-title>Network Image Installer</oem-boot-title>
+<!-- default: usb image -->
+    <type filesystem="ext3" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type>
+<!--    <type filesystem="clicfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type> -->
+<!--    <type fsreadwrite="ext3" fsreadonly="squashfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">split</type> -->
+<!-- addon: iso image -->
+    <type flags="clic" checkprebuilt="true" fsnocheck="true" boot="isoboot/suse-11.2">iso</type>
+    <version>0.0.1</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <rpm-excludedocs>true</rpm-excludedocs>
+    <locale>en_US</locale>
+    <boot-theme>openSUSE</boot-theme>
+  </preferences>
+  <users group="root">
+    <user name="root" shell="/bin/bash" pwd="$1$3t3vqXtz$5vCuNgQzOYDy3JfSalKjZ." home="/root"/>
+  </users>
+  <split>
+      <temporary>
+        <file name="/etc"/>
+        <file name="/etc/*"/>
+        <file name="/tmp"/>
+        <file name="/tmp/*"/>
+        <file name="/var"/>
+        <file name="/var/*"/>
+      </temporary>
+<!--      <persistent>
+        <file name="/root"/>
+        <file name="/root/*"/>
+      </persistent> -->
+  </split>
+  <packages patternType="onlyRequired" type="image" patternPackageType="plusRecommended">
+<!--    <package name='ConsoleKit'/>
+    <package name='PolicyKit'/> -->
+    <package name="aaa_base"/>
+<!--    <package name='audit-libs'/> -->
+    <package name="bash"/>
+    <package name="branding-openSUSE"/>
+    <package name="bzip2"/>
+    <package name="coreutils"/>
+    <package name="cpio"/>
+<!--    <package name='dbus-1'/>
+    <package name='dbus-1-glib'/> -->
+    <package name="dhcpcd"/>
+    <package name="dialog"/>
+    <package name="diffutils"/>
+<!--    <package name='dirmngr'/> -->
+    <package name="e2fsprogs"/>
+    <package name="elfutils"/>
+    <package name="file"/>
+    <package name="filesystem"/>
+    <package name="fillup"/>
+    <package name="findutils"/>
+    <package name="gawk"/>
+    <package name="glibc"/>
+    <package name="gpg2"/>
+    <package name="grep"/>
+    <package name="grub"/>
+    <package name="gzip"/>
+    <package name="hal"/>
+    <package name="hwinfo"/>
+    <package name="info"/>
+    <package name="insserv"/>
+    <package name="iproute2"/>
+    <package name="iputils"/>
+    <package name="kbd"/>
+    <package name="kernel-default"/>
+    <package name="kiwi-tools"/>
+<!--    <package name='keyutils-libs'/> -->
+    <package name="klogd"/>
+<!--    <package name='krb5'/> -->
+    <package name="less"/>
+    <package name="libadns1"/>
+    <package name="libasm1"/>
+    <package name="libblkid1"/>
+    <package name="libbz2-1"/>
+<!--    <package name='libdb-4_5'/> -->
+    <package name="libelf1"/>
+    <package name="libexpat1"/>
+    <package name="libext2fs2"/>
+    <package name="libgcc44"/>
+    <package name="libgcrypt11"/>
+    <package name="libgio-2_0-0"/>
+    <package name="libglib-2_0-0"/>
+    <package name="libgmodule-2_0-0"/>
+    <package name="libgobject-2_0-0"/>
+    <package name="libgpg-error0"/>
+    <package name="libgssglue1"/>
+    <package name="libgthread-2_0-0"/>
+    <package name="libksba"/>
+    <package name="libldap-2_4-2"/>
+    <package name="libltdl7"/>
+    <package name="liblua5_1"/>
+    <package name="liblzma0"/>
+    <package name="libncurses5"/>
+    <package name="libncurses6"/>
+    <package name="libnet"/>
+    <package name="libnscd"/>
+    <package name="libopenct1"/>
+    <package name="libopensc2"/>
+    <package name="libopenssl0_9_8"/>
+    <package name="libpcre0"/>
+    <package name="libpolkit0"/>
+    <package name="libpopt0"/>
+    <package name="libpth20"/>
+    <package name="libreadline6"/>
+    <package name="librpcsecgss"/>
+    <package name="libselinux1"/>
+    <package name="libtirpc1"/>
+    <package name="libusb-0_1-4"/>
+    <package name="libusb-1_0-0"/>
+    <package name="libuuid1"/>
+    <package name="libx86emu1"/>
+    <package name="libxcrypt"/>
+    <package name="libzio"/>
+<!--    <package name='licenses'/> -->
+    <package name="login"/>
+    <package name="logrotate"/>
+    <package name="mingetty"/>
+<!--    <package name='mkinitrd'/> -->
+    <package name="module-init-tools"/>
+    <package name="ncurses-utils"/>
+    <package name="net-tools"/>
+    <package name="netcfg"/>
+    <package name="nfs-client"/>
+    <package name="nfsidmap"/>
+    <package name="openssh"/>
+    <package name="pam"/>
+    <package name="pam-config"/>
+    <package name="pam-modules"/>
+    <package name="pciutils"/>
+    <package name="pciutils-ids"/>
+    <package name="pcre"/>
+    <package name="perl-Bootloader"/>
+    <package name="perl-base"/>
+    <package name="permissions"/>
+<!--    <package name='polkit'/>
+    <package name='polkit-default-privs'/> -->
+    <package name="procps"/>
+    <package name="psmisc"/>
+    <package name="pwdutils"/>
+    <package name="rpcbind"/>
+    <package name="rpm"/>
+    <package name="sed"/>
+    <package name="setserial"/>
+    <package name="sysconfig"/>
+    <package name="syslog-ng"/>
+    <package name="sysvinit"/>
+    <package name="tcpd"/>
+    <package name="terminfo-base"/>
+    <package name="udev"/>
+    <package name="update-alternatives"/>
+    <package name="util-linux"/>
+    <package name="vim"/>
+<!--    <package name='vim-base'/> -->
+    <package name="zlib"/>
+  </packages>
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+<!--    <package name='glibc-locale'/> -->
+  </packages>
+  <repository type="rpm-md">
+<!--    <source path="http://download.opensuse.org/update/11.2"/> -->
+    <source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/update/11.2/"/>
+  </repository>
+  <repository type="yast2">
+<!--    <source path="http://download.opensuse.org/distribution/11.2/repo/oss/"/> -->
+    <source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/distribution/11.2/repo/oss/"/>
+  </repository>
+</image>

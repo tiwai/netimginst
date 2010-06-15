@@ -1,0 +1,160 @@
+#!/bin/sh
+
+## On exit reboot
+#trap "cd /; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net; echo 'Press <return> to reboot; enter anything else to abort'; read i; if [ \"x\$i\" = x ] ; then sync; mount -oremount,ro /; sync; sleep 1; /sbin/reboot -f; sleep 100000000 ; fi" EXIT
+trap "cd /; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
+set +H
+
+# Default args
+mkdir -p /mnt/net /mnt/iso
+server=berg.suse.de:/data_build
+dir=image
+image=ask
+dialog=true
+# Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
+
+# Get args from boot line and addon commandline in /
+test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image=\|dialog='`
+eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image=\|dialog='`
+test "x$dialog" = xtrue || dialog=false
+
+# Get supposed harddisk
+# Find largest disk
+disk="`fdisk -lu | perl -e 'while (<>) { if (/^Disk \/dev\/(sd.): .*, (\d+) bytes/ && $2 > $s) { $d=$1; $s=$2 }} print "$d"'`"
+if [ ! -e "/dev/$disk" ] ; then
+    echo "Cannot find disk:"
+    fdisk -lu
+fi
+
+echo ""
+echo ""
+echo ""
+echo "===== Network Image Installer ====="
+echo ""
+echo ""
+echo "server = $server"
+echo "dir    = $dir"
+echo "image  = $image"
+echo ""
+echo ""
+
+# Find compressed image
+
+while ! mount $server /mnt/net ; do
+    test "x$server" = xask || echo "Cannot mount server $server"
+    echo -n "Please enter server (or press enter to leave): "
+    read server
+    test "x$server" = x && exit 1
+done
+
+while ! cd /mnt/net/$dir ; do
+    test "x$dir" = xask || echo "Cannot cd to $dir"
+    echo -n "Please enter subdirectory ('.' for current, or press enter to leave): "
+    read dir
+    test "x$dir" = x && exit 1
+done
+
+vers="`/bin/ls -U | sed -e '/\.iso$/!d;s/.*-\([0-9.]\+\).iso/\1/' | sort -rn `"
+
+echo "Available image versions on $server"
+echo ""
+echo "$vers" | perl -ne 'chomp; printf "%-18s  ", $_; print "\n" if ++$i % 4 == 0;'
+echo ""
+echo ""
+echo ""
+
+test "x$image" = "xlatest" && image="`echo "$vers" | tail -1`"
+
+iso="`echo *-$image.iso`"
+while [ ! -e "$iso" ] ; do
+    test "x$image" = xask || echo "Cannot find selected image $image"
+    if $dialog ; then
+	unset args
+	i=0
+	for f in $vers ; do
+	    args[$i]=$f
+	    i=$(($i+1))
+	    args[$i]="`echo *-$f.iso`"
+	    i=$(($i+1))
+	done
+	dialog 2>/tmp/selection --no-shadow --menu "Please select image" 0 0 0 "${args[@]}"
+	image="`cat /tmp/selection`"
+    else
+	echo -n "Please select image (or press enter to leave): "
+	read image
+	test "x$image" = x && exit 1
+    fi
+    iso="`echo *-$image.iso`"
+done
+
+$dialog || echo "Found image $server/$dir/$iso"
+mount -o loop,ro -t udf "$iso" /mnt/iso || exit 1
+
+file="`echo /mnt/iso/*.bz2`"
+test -e "$file" || file="`echo /mnt/iso/*.gz`"
+
+if [ ! -e "$file" ] ; then
+    /bin/ls -al /mnt/iso
+    echo "Cannot find compressed image in iso - exiting"
+    exit 1
+fi
+
+$dialog || echo "Found compressed image $file"
+read sum1 blocks blocksize remain <"$file.md5"
+size=$(($blocks * $blocksize))
+sizeM=$(($size / 1048576))
+echo ""
+echo ""
+
+# Verify with user
+
+cat >/tmp/msg << EOACCEPT
+Ready to dump image
+
+    $server/$dir/
+    $iso
+
+on drive $disk.
+
+This will destroy all data! Make sure the right disk is used!
+
+EOACCEPT
+fdisk -l | grep '^Disk /dev' >>/tmp/msg
+
+if $dialog ; then
+    dialog --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label ABORT --yesno "`cat /tmp/msg`" 0 0 || exit 1
+else
+    cat /tmp/msg
+    echo ">>> Press <return> to continue, enter anything else to abort <<<"
+    read i
+    test "x$i" = x || exit 1
+fi
+
+# Dump on disk
+
+case "$file" in
+*.bz2)	expand="bunzip2"	;;
+*.gz)	expand="gunzip"		;;
+esac
+progress=""
+test -x /usr/bin/dcounter -a "$sizeM" -gt 0 && $dialog && progress='((dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --stdout --gauge "Dumping $image to $disk" 0 70 ) 2>&1) | '
+
+eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
+
+# Done
+
+echo "Done. Rebooting"
+
+cd
+umount /mnt/iso
+umount /mnt/net
+
+sleep 3
+trap "" EXIT
+
+sync
+mount -oremount,ro /
+sync
+sleep 1
+/sbin/reboot -f
+

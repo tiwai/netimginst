@@ -1,0 +1,26 @@
+color cyan/blue white/blue
+default 0
+timeout 10
+gfxmenu (hd0,0)/boot/message
+
+title Selected image to install
+ root (hd0,0)
+ kernel /boot/linux.vmx vga=0x314 loader=grub splash=silent  showopts server=berg.suse.de:/data_build dir=image image=ask
+ initrd /boot/initrd.vmx
+
+title Install latest image from berg
+ root (hd0,0)
+ kernel /boot/linux.vmx vga=0x314 loader=grub splash=silent  showopts image=latest
+ initrd /boot/initrd.vmx
+
+title Manually select image
+ root (hd0,0)
+ kernel /boot/linux.vmx vga=0x314 loader=grub splash=silent  showopts server=ask dir=ask image=manual dialog=false
+ initrd /boot/initrd.vmx
+
+title Failsafe -- Network Image Installer
+ root (hd0,0)
+ kernel /boot/linux.vmx vga=0x314 loader=grub splash=silent ide=nodma apm=off acpi=off noresume selinux=0 nosmp noapic maxcpus=0 edd=off 
+ showopts
+ initrd /boot/initrd.vmx
+
