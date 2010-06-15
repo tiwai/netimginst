@@ -76,7 +76,6 @@
     <package name="iputils"/>
     <package name="kbd"/>
     <package name="kernel-default"/>
-    <package name="kiwi-tools"/>
 <!--    <package name='keyutils-libs'/> -->
     <package name="klogd"/>
 <!--    <package name='krb5'/> -->

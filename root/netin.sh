@@ -137,7 +137,7 @@ case "$file" in
 *.gz)	expand="gunzip"		;;
 esac
 progress=""
-test -x /usr/bin/dcounter -a "$sizeM" -gt 0 && $dialog && progress='((dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --stdout --gauge "Dumping $image to $disk" 0 70 ) 2>&1) | '
+test -x /dcounter -a "$sizeM" -gt 0 && $dialog && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --stdout --gauge "Dumping $image to $disk" 0 70 ) 2>&1) | '
 
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 
