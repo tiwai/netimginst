@@ -7,11 +7,14 @@ set +H
 
 # Default args
 mkdir -p /mnt/net /mnt/iso
-server=berg.suse.de:/data_build
-dir=image
+server=ask
+dir=ask
 image=ask
 dialog=true
 # Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
+
+# Known servers
+all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images")
 
 # Get args from boot line and addon commandline in /
 test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image=\|dialog='`
@@ -41,10 +44,28 @@ echo ""
 # Find compressed image
 
 while ! mount $server /mnt/net ; do
-    test "x$server" = xask || echo "Cannot mount server $server"
-    echo -n "Please enter server (or press enter to leave): "
-    read server
-    test "x$server" = x && exit 1
+    if $dialog ; then
+        test "x$server" = xask || sleep 2
+	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory" 0 70 15 "${all_servers[@]}"
+	read n n2 server dir </tmp/selection
+	case "$n" in
+	    "RENAMED")
+	    	;;
+	    "")
+	    	exit 1
+	    	;;
+	    *)
+	    	echo ${all_servers[$(($n * 2 - 1))]} >/tmp/selection
+		read server dir </tmp/selection
+		;;
+	    esac
+    else
+        test "x$server" = xask || echo "Cannot mount server $server"
+	echo "Known servers: " "${all_servers[@]}"
+	echo -n "Please enter server:directory (or press enter to leave): "
+	read server
+	test "x$server" = x && exit 1
+    fi
 done
 
 while ! cd /mnt/net/$dir ; do
@@ -69,6 +90,7 @@ iso="`echo *-$image.iso`"
 while [ ! -e "$iso" ] ; do
     test "x$image" = xask || echo "Cannot find selected image $image"
     if $dialog ; then
+        test "x$image" = xask || sleep 2
 	unset args
 	i=0
 	for f in $vers ; do
@@ -79,6 +101,7 @@ while [ ! -e "$iso" ] ; do
 	done
 	dialog 2>/tmp/selection --no-shadow --menu "Please select image" 0 0 0 "${args[@]}"
 	image="`cat /tmp/selection`"
+	test "x$image" = x && exit 1
     else
 	echo -n "Please select image (or press enter to leave): "
 	read image
@@ -96,6 +119,7 @@ test -e "$file" || file="`echo /mnt/iso/*.gz`"
 if [ ! -e "$file" ] ; then
     /bin/ls -al /mnt/iso
     echo "Cannot find compressed image in iso - exiting"
+    sleep 2
     exit 1
 fi
 
