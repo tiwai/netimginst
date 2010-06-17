@@ -2,43 +2,53 @@
 <image schemaversion="3.7" name="Network_Image_Installer">
   <description type="system">
     <author>Matthias Hopf</author>
-    <contact>studio-devel@suse.de</contact>
-    <specification>Tiny, minimalistic appliances</specification>
+    <contact>mhopf@suse.de</contact>
+    <specification>Network image installer</specification>
   </description>
   <preferences>
 <!--    <oem-swapsize>512</oem-swapsize> -->
     <oem-home>false</oem-home>
     <oem-boot-title>Network Image Installer</oem-boot-title>
 <!-- default: usb image -->
-    <type filesystem="ext3" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type>
+<!--    <type filesystem="ext3" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type> -->
 <!--    <type filesystem="clicfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type> -->
-<!--    <type fsreadwrite="ext3" fsreadonly="squashfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">split</type> -->
+    <type fsreadwrite="ext3" fsreadonly="squashfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">split</type>
 <!-- addon: iso image -->
     <type flags="clic" checkprebuilt="true" fsnocheck="true" boot="isoboot/suse-11.2">iso</type>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
     <rpm-excludedocs>true</rpm-excludedocs>
     <locale>en_US</locale>
     <boot-theme>openSUSE</boot-theme>
+    <size>100M</size>
   </preferences>
   <users group="root">
     <user name="root" shell="/bin/bash" pwd="$1$3t3vqXtz$5vCuNgQzOYDy3JfSalKjZ." home="/root"/>
   </users>
   <split>
-      <temporary>
+      <!--      <temporary>
         <file name="/etc"/>
         <file name="/etc/*"/>
+    </temporary> -->
+      <persistent>
+        <file name="/boot"/>
+        <file name="/boot/*"/>
+        <file name="/root"/>
+        <file name="/root/*"/>
         <file name="/tmp"/>
         <file name="/tmp/*"/>
         <file name="/var"/>
         <file name="/var/*"/>
-      </temporary>
-<!--      <persistent>
-        <file name="/root"/>
-        <file name="/root/*"/>
-      </persistent> -->
+        <file name="/netin.sh"/>
+	<file name="/etc"/>
+	<file name="/etc/init.d/boot.local"/>
+	<file name="/etc/init.d/firstboot"/>
+	<file name="/etc/zypp/*"/>
+	<file name="/mnt"/>
+	<file name="/mnt/*"/>
+      </persistent>
   </split>
   <packages patternType="onlyRequired" type="image" patternPackageType="plusRecommended">
 <!--    <package name='ConsoleKit'/>
@@ -46,7 +56,9 @@
     <package name="aaa_base"/>
 <!--    <package name='audit-libs'/> -->
     <package name="bash"/>
-    <package name="branding-openSUSE"/>
+<!--    <package name="branding-openSUSE"/> -->
+    <package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+    <package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
     <package name="bzip2"/>
     <package name="coreutils"/>
     <package name="cpio"/>
