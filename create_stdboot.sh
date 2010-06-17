@@ -78,6 +78,13 @@ run_cmd "$kiwi --prepare . --root build/root --logfile $log" $log
 log='create.log'
 run_cmd "$kiwi --create build/root -d image \
                --logfile $log" $log
+
+run_cmd "rm -rf build/root"
+run_cmd "mkdir -p build image"
+
+log='prepare-iso.log'
+run_cmd "$kiwi --prepare . -t iso --root build/root --logfile $log" $log
+
 log='create-iso.log'
 run_cmd "$kiwi --create build/root -t iso -d image \
                --logfile $log" $log
