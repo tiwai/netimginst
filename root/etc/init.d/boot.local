@@ -1,12 +1,5 @@
 #! /bin/sh
 #
-# Copyright (c) 2002 SuSE Linux AG Nuernberg, Germany.  All rights reserved.
-#
-# Author: Werner Fink <werner@suse.de>, 1996
-#         Burchard Steinbild, 1996
-#
-# /etc/init.d/boot.local
-#
 # script with local commands to be executed from init on system startup
 #
 # Here you should add things, that should happen directly after booting
@@ -17,4 +10,9 @@
 if [ -x /etc/init.d/firstboot ]; then
     /etc/init.d/firstboot
 fi
+
+# Remove persistent udev rules - breaks network on subsequent boots
+rm -f /etc/udev/rules.d/*-persistent-*.rules
+
+exit 0
 
