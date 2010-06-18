@@ -42,4 +42,7 @@ rm -rf /usr/share/locale /usr/share/doc /usr/lib/locale
 sed -i -e 's/ showopts/ showopts server=berg.suse.de:\/data_build dir=image image=ask/' /etc/sysconfig/bootloader
 sed -i -e 's/ ide=nodma/ dialog=false ide=nodma/' /etc/sysconfig/bootloader
 
+# Allow sysrq
+sed -i -e 's/^ENABLE_SYSRQ=.*/ENABLE_SYSRQ="yes"/' /etc/sysconfig/sysctl
+
 true
