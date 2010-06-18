@@ -15,7 +15,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">split</type>
 <!-- addon: iso image -->
     <type flags="clic" checkprebuilt="true" fsnocheck="true" boot="isoboot/suse-11.2">iso</type>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
