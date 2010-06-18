@@ -1,7 +1,6 @@
 #!/bin/sh
 
 ## On exit reboot
-#trap "cd /; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net; echo 'Press <return> to reboot; enter anything else to abort'; read i; if [ \"x\$i\" = x ] ; then sync; mount -oremount,ro /; sync; sleep 1; /sbin/reboot -f; sleep 100000000 ; fi" EXIT
 trap "cd /; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
 set +H
 
@@ -136,27 +135,44 @@ echo ""
 
 # Verify with user
 
-cat >/tmp/msg << EOACCEPT
-Ready to dump image
+device=ask
+while [ ! -e "$device" ] ; do
+    cat >/tmp/msg <<- EOACCEPT
+	Ready to dump image
 
-    $server/$dir/
-    $iso
+	    $server/$dir/
+	    $iso
 
-on drive $disk.
+	on drive $disk.
 
-This will destroy all data! Make sure the right disk is used!
+	This will destroy all data! Make sure the right disk is used!
 
-EOACCEPT
-fdisk -l | grep '^Disk /dev' >>/tmp/msg
+	EOACCEPT
+    fdisk -l | grep '^Disk /dev' >>/tmp/msg
 
-if $dialog ; then
-    dialog --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label ABORT --yesno "`cat /tmp/msg`" 0 0 || exit 1
-else
-    cat /tmp/msg
-    echo ">>> Press <return> to continue, enter anything else to abort <<<"
-    read i
-    test "x$i" = x || exit 1
-fi
+    if $dialog ; then
+	dialog --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label ABORT --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
+	case $? in
+	0)
+	    device="/dev/$disk"
+	    ;;
+	3)
+	    echo -n "Please enter drive: "
+	    read disk
+	    test "x$disk" = x && exit 1
+	    ;;
+	*)
+	    exit 1
+	    ;;
+	esac
+    else
+	cat /tmp/msg
+	echo ">>> Press <return> to continue, enter anything else to abort <<<"
+	read i
+	test "x$i" = x || exit 1
+	device="/dev/$disk"
+    fi
+done
 
 # Dump on disk
 
@@ -181,7 +197,9 @@ sleep 3
 trap "" EXIT
 
 sync
-mount -oremount,ro /
+#mount -oremount,ro /
+echo u >/proc/sysrq-trigger
+echo s >/proc/sysrq-trigger
 sync
 sleep 1
 /sbin/reboot -f
