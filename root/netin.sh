@@ -111,7 +111,11 @@ while [ ! -e "$iso" ] ; do
 done
 
 $dialog || echo "Found image $server/$dir/$iso"
-mount -o loop,ro -t udf "$iso" /mnt/iso || exit 1
+if mount -o loop,ro -t udf "$iso" /mnt/iso ; then :; else
+    echo "mounting $iso on /mnt/iso failed"
+    sleep 2
+    exit 1
+fi
 
 file="`echo /mnt/iso/*.bz2`"
 test -e "$file" || file="`echo /mnt/iso/*.gz`"
