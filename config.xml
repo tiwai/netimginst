@@ -161,6 +161,7 @@
 <!--    <package name='licenses'/> -->
     <package name="login"/>
     <package name="logrotate"/>
+    <package name="lsof"/>
     <package name="mdadm"/>
     <package name="mingetty"/>
 <!--    <package name='mkinitrd'/> -->
