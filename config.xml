@@ -200,6 +200,7 @@
     <package name="util-linux"/>
     <package name="vim"/>
 <!--    <package name='vim-base'/> -->
+    <package name="wireless-tools"/>
     <package name="zlib"/>
   </packages>
   <packages type="bootstrap">
