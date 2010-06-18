@@ -79,48 +79,13 @@ log='create.log'
 run_cmd "$kiwi --create build/root -d image \
                --logfile $log" $log
 
-run_cmd "rm -rf build/root"
-run_cmd "mkdir -p build image"
-
-log='prepare-iso.log'
-run_cmd "$kiwi --prepare . -t iso --root build/root --logfile $log" $log
-
-log='create-iso.log'
-run_cmd "$kiwi --create build/root -t iso -d image \
-               --logfile $log" $log
-
 base="image/Network_Image_Installer.i686-$vers"
-
-# Binary patch ISO (selected default)
-perl -e '
-  $s="default Network_Image_Installer";
-  $t=length($s);
-  $r=sprintf ("default %$t.${t}s","harddisk");
-  open F, "+<$ARGV[0]" or die;
-  seek F, 0, 2;
-  $l=tell(F) / 2048;
-  for $i (0..$l-1) {
-    seek F, 2048*$i, 0;
-    read F, $_, 2048;
-    if ($_ =~ /^$s\s/) {
-      s/^$s/$r/;
-      s/\bimplicit 1/implicit 3/;
-      seek F, 2048*$i, 0;
-      print F $_;
-      close F;
-      exit 0;
-    }
-  }
-  exit 1;
-' "$base.iso" || echo "Binary patching ISO failed"
 
 # And we're done!
 echo
 echo "** Appliance created successfully!"
 echo "$base.raw"
-echo "$base.iso"
 echo ""
 echo "To boot one of the images using qemu-kvm, run the following command:"
 echo "  qemu-kvm -m 512 -snapshot $base.raw &"
-echo "  qemu-kvm -m 512 -cdrom $base.iso &"
 echo
