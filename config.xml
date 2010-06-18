@@ -27,27 +27,50 @@
   <users group="root">
     <user name="root" shell="/bin/bash" pwd="$1$3t3vqXtz$5vCuNgQzOYDy3JfSalKjZ." home="/root"/>
   </users>
+  <!--
   <split>
-      <!--      <temporary>
+      <temporary>
         <file name="/etc"/>
         <file name="/etc/*"/>
-    </temporary> -->
+	<except name="/etc/init.d/boot.local"/>
+	<except name="/etc/init.d/firstboot"/>
+	<except name="/etc/zypp/*"/>
+	<file name="/mnt"/>
+	<file name="/mnt/*"/>
+        <file name="/tmp"/>
+        <file name="/tmp/*"/>
+        <file name="/var"/>
+        <file name="/var/*"/>
+      </temporary>
       <persistent>
         <file name="/boot"/>
         <file name="/boot/*"/>
         <file name="/root"/>
         <file name="/root/*"/>
+        <file name="/netin.sh"/>
+	<file name="/etc/init.d/boot.local"/>
+	<file name="/etc/init.d/firstboot"/>
+	<file name="/etc/zypp/*"/>
+      </persistent>
+  </split>
+  -->
+  <split>
+      <persistent>
+        <file name="/etc"/>
+	<file name="/mnt"/>
+	<file name="/mnt/*"/>
         <file name="/tmp"/>
         <file name="/tmp/*"/>
         <file name="/var"/>
         <file name="/var/*"/>
+        <file name="/boot"/>
+        <file name="/boot/*"/>
+        <file name="/root"/>
+        <file name="/root/*"/>
         <file name="/netin.sh"/>
-	<file name="/etc"/>
 	<file name="/etc/init.d/boot.local"/>
 	<file name="/etc/init.d/firstboot"/>
 	<file name="/etc/zypp/*"/>
-	<file name="/mnt"/>
-	<file name="/mnt/*"/>
       </persistent>
   </split>
   <packages patternType="onlyRequired" type="image" patternPackageType="plusRecommended">
