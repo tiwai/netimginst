@@ -89,8 +89,32 @@ log='create-iso.log'
 run_cmd "$kiwi --create build/root -t iso -d image \
                --logfile $log" $log
 
-# And we're done!
 base="image/Network_Image_Installer.i686-$vers"
+
+# Binary patch ISO (selected default)
+perl -e '
+  $s="default Network_Image_Installer";
+  $t=length($s);
+  $r=sprintf ("default %$t.${t}s","harddisk");
+  open F, "+<$ARGV[0]" or die;
+  seek F, 0, 2;
+  $l=tell(F) / 2048;
+  for $i (0..$l-1) {
+    seek F, 2048*$i, 0;
+    read F, $_, 2048;
+    if ($_ =~ /^$s\s/) {
+      s/^$s/$r/;
+      s/\bimplicit 1/implicit 3/;
+      seek F, 2048*$i, 0;
+      print F $_;
+      close F;
+      exit 0;
+    }
+  }
+  exit 1;
+' "$base.iso" || echo "Binary patching ISO failed"
+
+# And we're done!
 echo
 echo "** Appliance created successfully!"
 echo "$base.raw"
