@@ -13,7 +13,7 @@ dialog=true
 # Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
 
 # Known servers
-all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images")
+all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images" 3 "hewson:/data        image")
 
 # Get args from boot line and addon commandline in /
 test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image=\|dialog='`
