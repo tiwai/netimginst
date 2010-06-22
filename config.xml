@@ -10,11 +10,9 @@
     <oem-home>false</oem-home>
     <oem-boot-title>Network Image Installer</oem-boot-title>
 <!-- default: usb image -->
-<!--    <type filesystem="ext3" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type> -->
-<!--    <type filesystem="clicfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">oem</type> -->
-    <type fsreadwrite="ext3" fsreadonly="squashfs" checkprebuilt="true" fsnocheck="true" boot="oemboot/suse-11.2">split</type>
+    <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.2">split</type>
 <!-- addon: iso image -->
-    <type flags="clic" checkprebuilt="true" fsnocheck="true" boot="isoboot/suse-11.2">iso</type>
+    <type flags="clic" boot="isoboot/suse-11.2">iso</type>
     <version>1.0.1</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
