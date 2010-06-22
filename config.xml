@@ -91,6 +91,7 @@
 <!--    <package name='dirmngr'/> -->
     <package name="e2fsprogs"/>
     <package name="elfutils"/>
+    <package name="ethtool"/>
     <package name="file"/>
     <package name="filesystem"/>
     <package name="fillup"/>
