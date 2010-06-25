@@ -20,6 +20,11 @@ test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image=\|
 eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image=\|dialog='`
 test "x$dialog" = xtrue || dialog=false
 
+# TODO: this might still call dialog
+/netconf.sh
+net="`cat /tmp/net_device`"
+net="${net:-[no net]}"
+
 # Get supposed harddisk
 # Find largest disk
 disk="`fdisk -lu | perl -e 'while (<>) { if (/^Disk \/dev\/(sd.): .*, (\d+) bytes/ && $2 > $s) { $d=$1; $s=$2 }} print "$d"'`"
@@ -45,7 +50,7 @@ echo ""
 while ! mount $server /mnt/net ; do
     if $dialog ; then
         test "x$server" = xask || sleep 2
-	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory" 0 70 15 "${all_servers[@]}"
+	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" 0 70 15 "${all_servers[@]}"
 	read n n2 server dir </tmp/selection
 	case "$n" in
 	    "RENAMED")
@@ -143,7 +148,7 @@ while [ ! -e "$device" ] ; do
 	    $server/$dir/
 	    $iso
 
-	on drive $disk.
+	via $net on drive $disk.
 
 	This will destroy all data! Make sure the right disk is used!
 

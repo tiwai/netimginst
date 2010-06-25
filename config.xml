@@ -13,7 +13,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.2">split</type>
 <!-- addon: iso image -->
     <type flags="clic" boot="isoboot/suse-11.2">iso</type>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
@@ -110,6 +110,7 @@
     <package name="iputils"/>
     <package name="kbd"/>
     <package name="kernel-default"/>
+    <package name="kernel-firmware"/>
 <!--    <package name='keyutils-libs'/> -->
     <package name="klogd"/>
 <!--    <package name='krb5'/> -->
@@ -200,6 +201,8 @@
     <package name="vim"/>
 <!--    <package name='vim-base'/> -->
     <package name="wireless-tools"/>
+    <package name="wget"/>
+    <package name="wpa_supplicant"/>
     <package name="zlib"/>
   </packages>
   <packages type="bootstrap">
