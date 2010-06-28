@@ -13,7 +13,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.2">split</type>
 <!-- addon: iso image -->
     <type flags="clic" boot="isoboot/suse-11.2">iso</type>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
@@ -46,6 +46,7 @@
         <file name="/root"/>
         <file name="/root/*"/>
         <file name="/netin.sh"/>
+        <file name="/netconf.sh"/>
 	<file name="/etc/init.d/boot.local"/>
 	<file name="/etc/init.d/firstboot"/>
 	<file name="/etc/zypp/*"/>
@@ -66,6 +67,7 @@
         <file name="/root"/>
         <file name="/root/*"/>
         <file name="/netin.sh"/>
+        <file name="/netconf.sh"/>
 	<file name="/etc/init.d/boot.local"/>
 	<file name="/etc/init.d/firstboot"/>
 	<file name="/etc/zypp/*"/>
