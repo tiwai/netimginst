@@ -1,34 +1,38 @@
+1.1.2
+
+ * Don't remove ifcfg-lo (prohibits nfs mounts)
+
 1.1.1
 
-* Display network speed
+ * Display network speed
 
-* Minor fixes
+ * Minor fixes
 
 1.1.0
 
-* Add support for additional network cards and wireless in "Novell" network
+ * Add support for additional network cards and wireless in "Novell" network
 
 1.0.2
 
-* Add hewson as potential image source
+ * Add hewson as potential image source
 
-* Add ethtool
+ * Add ethtool
 
 1.0.1
 
-* Make harddisk the default boot device of iso images
+ * Make harddisk the default boot device of iso images
 
-* Allow changing of target device
+ * Allow changing of target device
 
-* Show mount errors
+ * Show mount errors
 
-* Enable sysrq
+ * Enable sysrq
 
-* Add wireless-tools, lsof
+ * Add wireless-tools, lsof
 
-* Cleanup.
+ * Cleanup.
 
 1.0.0
 
-* Initial version
+ * Initial version
 
