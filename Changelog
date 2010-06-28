@@ -1,0 +1,34 @@
+1.1.1
+
+* Display network speed
+
+* Minor fixes
+
+1.1.0
+
+* Add support for additional network cards and wireless in "Novell" network
+
+1.0.2
+
+* Add hewson as potential image source
+
+* Add ethtool
+
+1.0.1
+
+* Make harddisk the default boot device of iso images
+
+* Allow changing of target device
+
+* Show mount errors
+
+* Enable sysrq
+
+* Add wireless-tools, lsof
+
+* Cleanup.
+
+1.0.0
+
+* Initial version
+
