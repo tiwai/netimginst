@@ -59,7 +59,7 @@ fi
 
 # Find compressed image
 
-while ! mount $server /mnt/net ; do
+while ! mount -o ro $server /mnt/net ; do
     if $dialog ; then
         test "x$server" = xask || sleep 2
 	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${all_servers[@]}"
