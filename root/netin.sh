@@ -22,8 +22,14 @@ test "x$dialog" = xtrue || dialog=false
 
 # TODO: this might still call dialog
 /netconf.sh
-net="`cat /tmp/net_device`"
-net="${net:-[no net]}"
+netdev="`cat /tmp/net_device`"
+
+# Get wire(less) speed
+netspeed="`iwconfig $netdev 2>&1 | sed '/Bit Rate/!d;s/.*Bit Rate= *\([0-9]*\) *Mb.*/\1/'`"
+if [ "x$netspeed" = x ] ; then
+    netspeed="`ethtool $netdev 2>&1 | sed '/Speed:/!d;s/.*Speed: *\([0-9]*\) *Mb.*/\1/'`"
+fi
+net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
 # Get supposed harddisk
 # Find largest disk
@@ -33,24 +39,30 @@ if [ ! -e "/dev/$disk" ] ; then
     fdisk -lu
 fi
 
-echo ""
-echo ""
-echo ""
-echo "===== Network Image Installer ====="
-echo ""
-echo ""
-echo "server = $server"
-echo "dir    = $dir"
-echo "image  = $image"
-echo ""
-echo ""
+if $dialog ; then :; else
+    cat <<-EOINI
+	
+	
+	===== Network Image Installer =====
+	
+	
+	net    = $net
+	disk   = $disk
+	
+	server = $server
+	dir    = $dir
+	image  = $image
+	
+	
+	EOINI
+fi
 
 # Find compressed image
 
 while ! mount $server /mnt/net ; do
     if $dialog ; then
         test "x$server" = xask || sleep 2
-	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" 0 70 15 "${all_servers[@]}"
+	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${all_servers[@]}"
 	read n n2 server dir </tmp/selection
 	case "$n" in
 	    "RENAMED")
@@ -186,7 +198,7 @@ case "$file" in
 *.gz)	expand="gunzip"		;;
 esac
 progress=""
-test -x /dcounter -a "$sizeM" -gt 0 && $dialog && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --stdout --gauge "Dumping $image to $disk" 0 70 ) 2>&1) | '
+test -x /dcounter -a "$sizeM" -gt 0 && $dialog && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --stdout --gauge "Dumping $image to $disk" 0 75 ) 2>&1) | '
 
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 
