@@ -38,7 +38,7 @@ for n in $ifaces ; do
 done
 
 # Wait to settle carrier detection on slow devices
-sleep 2
+sleep 3
 
 # Try to connect to ethernet first
 for n in $ifaces ; do
