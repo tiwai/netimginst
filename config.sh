@@ -46,6 +46,6 @@ sed -i -e 's/ ide=nodma/ dialog=false ide=nodma/' /etc/sysconfig/bootloader
 sed -i -e 's/^ENABLE_SYSRQ=.*/ENABLE_SYSRQ="yes"/' /etc/sysconfig/sysctl
 
 # Remove potentially available network configurations
-rm -f etc/sysconfig/network/ifcfg-*
+find /etc/sysconfig/network \( -name ifcfg-\* -a \! -name ifcfg-lo \) -exec rm \{\} \;
 
 true
