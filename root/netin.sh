@@ -22,7 +22,7 @@ test "x$dialog" = xtrue || dialog=false
 
 # TODO: this might still call dialog
 /netconf.sh
-netdev="`cat /tmp/net_device`"
+netdev="`cat /tmp/net_device 2>/dev/null`"
 
 # Get wire(less) speed
 netspeed="`iwconfig $netdev 2>&1 | sed '/Bit Rate/!d;s/.*Bit Rate= *\([0-9]*\) *Mb.*/\1/'`"
