@@ -195,6 +195,7 @@
     <package name="sysconfig"/>
     <package name="syslog-ng"/>
     <package name="sysvinit"/>
+    <package name="tar"/>
     <package name="tcpd"/>
     <package name="terminfo-base"/>
     <package name="udev"/>
