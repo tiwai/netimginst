@@ -37,6 +37,9 @@ for n in $ifaces ; do
     esac
 done
 
+# Unblock rfkill
+rfkill unblock all
+
 # Wait to settle carrier detection on slow devices
 sleep 3
 

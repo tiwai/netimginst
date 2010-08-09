@@ -91,7 +91,8 @@ while ! cd /mnt/net/$dir ; do
     test "x$dir" = x && exit 1
 done
 
-vers="`/bin/ls -U | sed -e '/\.iso$/!d;s/.*-\([0-9.]\+\).iso/\1/' | sort -rn `"
+#vers="`/bin/ls -U | sed -e '/\.iso$/!d;s/.*-\([0-9.]\+\).iso/\1/' | sort -rn `"
+vers="`/bin/ls -U | perl -e 'while (<>) { chomp; s/.*-//; s/\.iso$// || next; $n=$_; s/\b(\d+)\b/"0"x(8-length($1)).$1/ge; $v{$_}=$n; } for $k (sort {$b cmp $a} keys %v) { print "$v{$k}\n" }'`"
 
 echo "Available image versions on $server"
 echo ""

@@ -13,7 +13,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3">split</type>
 <!-- addon: iso image -->
     <type flags="clic" boot="isoboot/suse-11.3">iso</type>
-    <version>1.1.3</version>
+    <version>1.2.0</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
@@ -25,7 +25,6 @@
   <users group="root">
     <user name="root" shell="/bin/bash" pwd="$1$3t3vqXtz$5vCuNgQzOYDy3JfSalKjZ." home="/root"/>
   </users>
-  <!--
   <split>
       <temporary>
         <file name="/etc"/>
@@ -52,7 +51,7 @@
 	<file name="/etc/zypp/*"/>
       </persistent>
   </split>
-  -->
+  <!--
   <split>
       <persistent>
         <file name="/etc"/>
@@ -73,6 +72,7 @@
 	<file name="/etc/zypp/*"/>
       </persistent>
   </split>
+  -->
   <packages patternType="onlyRequired" type="image" patternPackageType="plusRecommended">
 <!--    <package name='ConsoleKit'/>
     <package name='PolicyKit'/> -->
@@ -112,7 +112,6 @@
     <package name="iputils"/>
     <package name="kbd"/>
     <package name="kernel-default"/>
-    <package name="kernel-firmware"/>
 <!--    <package name='keyutils-libs'/> -->
     <package name="klogd"/>
 <!--    <package name='krb5'/> -->
@@ -203,21 +202,27 @@
     <package name="util-linux"/>
     <package name="vim"/>
 <!--    <package name='vim-base'/> -->
-    <package name="wireless-tools"/>
     <package name="wget"/>
-    <package name="wpa_supplicant"/>
     <package name="zlib"/>
+    <!-- wireless related -->
+    <package name="atmel-firmware"/>
+    <package name="ipw-firmware"/>
+    <package name="kernel-firmware"/>
+    <package name="rfkill"/>
+    <package name="wireless-tools"/>
+    <package name="wpa_supplicant"/>
+    <package name="zd1211-firmware"/>
   </packages>
   <packages type="bootstrap">
     <package name="filesystem"/>
 <!--    <package name='glibc-locale'/> -->
   </packages>
   <repository type="rpm-md">
-<!--    <source path="http://download.opensuse.org/update/11.2"/> -->
-    <source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/update/11.2/"/>
+<!--    <source path="http://download.opensuse.org/update/11.3"/> -->
+    <source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/update/11.3/"/>
   </repository>
   <repository type="yast2">
-<!--    <source path="http://download.opensuse.org/distribution/11.2/repo/oss/"/> -->
-    <source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/distribution/11.2/repo/oss/"/>
+<!--    <source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/> -->
+    <source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/distribution/11.3/repo/oss/"/>
   </repository>
 </image>

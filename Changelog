@@ -1,3 +1,11 @@
+1.2.0
+
+ * Build on openSUSE 11.3, with new kiwi
+ * rfkill enable all devices
+ * Make most areas read-only now as new kiwi supports it
+   (except /boot, /root, /etc/zypp)
+ * Better sort image versions
+
 1.1.2
 
  * Don't remove ifcfg-lo (prohibits nfs mounts)
@@ -5,7 +13,6 @@
 1.1.1
 
  * Display network speed
-
  * Minor fixes
 
 1.1.0
@@ -15,21 +22,15 @@
 1.0.2
 
  * Add hewson as potential image source
-
  * Add ethtool
 
 1.0.1
 
  * Make harddisk the default boot device of iso images
-
  * Allow changing of target device
-
  * Show mount errors
-
  * Enable sysrq
-
  * Add wireless-tools, lsof
-
  * Cleanup.
 
 1.0.0
