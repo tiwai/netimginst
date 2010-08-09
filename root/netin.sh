@@ -1,8 +1,31 @@
 #!/bin/sh
 
-## On exit reboot
+#
+# Init
+#
+
+# On exit cleanup
 trap "cd /; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
 set +H
+
+# Reboot hard
+do_reboot() {
+    cd
+    umount /mnt/iso
+    umount /mnt/net
+
+    sleep 3
+    trap "" EXIT
+
+    sync
+    #mount -oremount,ro /
+    echo u >/proc/sysrq-trigger
+    echo s >/proc/sysrq-trigger
+    sync
+    sleep 1
+    /sbin/reboot -f
+    sleep 10000
+}
 
 # Default args
 mkdir -p /mnt/net /mnt/iso
@@ -11,6 +34,7 @@ dir=ask
 image=ask
 dialog=true
 # Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
+version="`cat /etc/ImageVersion`"
 
 # Known servers
 all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images" 3 "hewson:/data        image")
@@ -20,17 +44,6 @@ test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image=\|
 eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image=\|dialog='`
 test "x$dialog" = xtrue || dialog=false
 
-# TODO: this might still call dialog
-/netconf.sh
-netdev="`cat /tmp/net_device 2>/dev/null`"
-
-# Get wire(less) speed
-netspeed="`iwconfig $netdev 2>&1 | sed '/Bit Rate/!d;s/.*Bit Rate= *\([0-9]*\) *Mb.*/\1/'`"
-if [ "x$netspeed" = x ] ; then
-    netspeed="`ethtool $netdev 2>&1 | sed '/Speed:/!d;s/.*Speed: *\([0-9]*\) *Mb.*/\1/'`"
-fi
-net="${netdev:-[no net]} (${netspeed}Mb/s)"
-
 # Get supposed harddisk
 # Find largest disk
 disk="`fdisk -lu | perl -e 'while (<>) { if (/^Disk \/dev\/(sd.): .*, (\d+) bytes/ && $2 > $s) { $d=$1; $s=$2 }} print "$d"'`"
@@ -38,6 +51,38 @@ if [ ! -e "/dev/$disk" ] ; then
     echo "Cannot find disk:"
     fdisk -lu
 fi
+
+
+#
+# Get network configuration
+#
+
+# TODO: this might still call dialog
+/netconf.sh
+netdev="`cat /tmp/net_device 2>/dev/null`"
+
+# Check if network is available
+if [ "x$netdev" = x ] ; then
+    # TODO: this only calls dialog
+    dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label "Redetect Network" --no-label "Reboot" --extra-button --extra-label "Continue" --yesno "Cannot connect to any network.\nRetry, reboot, or continue after fixing manually." 0 0
+    case $? in
+    0)  # Redetect
+	exit 1
+	;;
+    3)  # Continue
+	;;
+    *)  # Reboot
+	do_reboot
+	;;
+    esac
+fi
+
+# Get wire(less) speed
+netspeed="`iwconfig $netdev 2>&1 | sed '/Bit Rate/!d;s/.*Bit Rate= *\([0-9]*\) *Mb.*/\1/'`"
+if [ "x$netspeed" = x ] ; then
+    netspeed="`ethtool $netdev 2>&1 | sed '/Speed:/!d;s/.*Speed: *\([0-9]*\) *Mb.*/\1/'`"
+fi
+net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
 if $dialog ; then :; else
     cat <<-EOINI
@@ -57,12 +102,14 @@ if $dialog ; then :; else
 	EOINI
 fi
 
+#
 # Find compressed image
+#
 
 while ! mount -o ro $server /mnt/net ; do
     if $dialog ; then
         test "x$server" = xask || sleep 2
-	dialog 2>/tmp/selection --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${all_servers[@]}"
+	dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" --cancel-label "Redetect Network" 0 75 15 "${all_servers[@]}"
 	read n n2 server dir </tmp/selection
 	case "$n" in
 	    "RENAMED")
@@ -116,9 +163,9 @@ while [ ! -e "$iso" ] ; do
 	    args[$i]="`echo *-$f.iso`"
 	    i=$(($i+1))
 	done
-	dialog 2>/tmp/selection --no-shadow --menu "Please select image" 0 0 0 "${args[@]}"
+	dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --menu "Please select image" --cancel-label "Back" 0 0 0 "${args[@]}"
 	image="`cat /tmp/selection`"
-	test "x$image" = x && exit 1
+	test "x$image" = x && exec $0 "$@"
     else
 	echo -n "Please select image (or press enter to leave): "
 	read image
@@ -169,7 +216,7 @@ while [ ! -e "$device" ] ; do
     fdisk -l | grep '^Disk /dev' >>/tmp/msg
 
     if $dialog ; then
-	dialog --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label ABORT --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
+	dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
 	case $? in
 	0)
 	    device="/dev/$disk"
@@ -180,7 +227,7 @@ while [ ! -e "$device" ] ; do
 	    test "x$disk" = x && exit 1
 	    ;;
 	*)
-	    exit 1
+	    exec $0 "$@"
 	    ;;
 	esac
     else
@@ -199,7 +246,7 @@ case "$file" in
 *.gz)	expand="gunzip"		;;
 esac
 progress=""
-test -x /dcounter -a "$sizeM" -gt 0 && $dialog && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --stdout --gauge "Dumping $image to $disk" 0 75 ) 2>&1) | '
+test -x /dcounter -a "$sizeM" -gt 0 && $dialog && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "Network Image Installer - V $version" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
 
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 
@@ -207,18 +254,6 @@ eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 
 echo "Done. Rebooting"
 
-cd
-umount /mnt/iso
-umount /mnt/net
+do_reboot
 
-sleep 3
-trap "" EXIT
-
-sync
-#mount -oremount,ro /
-echo u >/proc/sysrq-trigger
-echo s >/proc/sysrq-trigger
-sync
-sleep 1
-/sbin/reboot -f
 
