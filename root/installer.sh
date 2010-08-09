@@ -27,6 +27,15 @@ do_reboot() {
     sleep 10000
 }
 
+# Restart installer
+do_restart() {
+    cd /
+    umount 2>/dev/null /mnt/iso
+    umount 2>/dev/null /mnt/net
+    trap "" EXIT
+    exec $0 $@
+}
+
 # Default args
 mkdir -p /mnt/net /mnt/iso
 server=ask
@@ -55,7 +64,6 @@ fi
 # Get network configuration
 #
 
-/netconf.sh
 netdev="`cat /tmp/net_device 2>/dev/null`"
 
 # Check if network is available
@@ -72,6 +80,7 @@ if [ "x$netdev" = x ] ; then
 	;;
     esac
 fi
+title="$title  -  Host: `hostname`"
 
 # Get wire(less) speed
 netspeed="`iwconfig $netdev 2>&1 | sed '/Bit Rate/!d;s/.*Bit Rate= *\([0-9]*\) *Mb.*/\1/'`"
@@ -135,7 +144,7 @@ while [ ! -e "$iso" ] ; do
     done
     dialog 2>/tmp/selection --backtitle "$title" --no-shadow --cancel-label "Back" --menu "Please select image" 0 0 0 "${args[@]}"
     image="`cat /tmp/selection`"
-    test "x$image" = x && exec $0 "$@"
+    test "x$image" = x && do_restart
     iso="`echo *-$image.iso`"
 done
 
@@ -181,16 +190,16 @@ while [ ! -e "$device" ] ; do
     dialog --backtitle "$title" --no-shadow --no-collapse --cr-wrap --ok-label OK --cancel-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
     case $? in
 	0)
-	device="/dev/$disk"
-	;;
+	    device="/dev/$disk"
+	    ;;
 	3)
-	echo -n "Please enter drive: "
-	read disk
-	test "x$disk" = x && exit 1
-	;;
+	    echo -n "Please enter drive: "
+	    read disk
+	    test "x$disk" = x && exit 1
+	    ;;
 	*)
-	exec $0 "$@"
-	;;
+	    do_restart
+	    ;;
     esac
 done
 

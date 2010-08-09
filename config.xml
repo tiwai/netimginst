@@ -44,8 +44,8 @@
         <file name="/boot/*"/>
         <file name="/root"/>
         <file name="/root/*"/>
-        <file name="/netin.sh"/>
-        <file name="/netconf.sh"/>
+        <file name="/installer.sh"/>
+        <file name="/network.sh"/>
 	<file name="/etc/init.d/boot.local"/>
 	<file name="/etc/init.d/firstboot"/>
 	<file name="/etc/zypp/*"/>
