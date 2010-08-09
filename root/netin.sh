@@ -33,7 +33,7 @@ server=ask
 dir=ask
 image=ask
 # Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
-version="`cat /etc/ImageVersion`"
+title="`cat /etc/ImageVersion`"
 
 # Known servers
 all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images" 3 "hewson:/data        image")
@@ -60,7 +60,7 @@ netdev="`cat /tmp/net_device 2>/dev/null`"
 
 # Check if network is available
 if [ "x$netdev" = x ] ; then
-    dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label "Redetect Network" --no-label "Reboot" --extra-button --extra-label "Continue" --yesno "Cannot connect to any network.\nRetry, reboot, or continue after fixing manually." 0 0
+    dialog --backtitle "$title" --no-shadow --no-collapse --cr-wrap --ok-label "Redetect Network" --cancel-label "Reboot" --extra-button --extra-label "Continue" --yesno "Cannot connect to any network.\nRetry, reboot, or continue after fixing manually." 8 70
     case $? in
     0)  # Redetect
 	exit 1
@@ -87,7 +87,7 @@ net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
 while ! mount -o ro $server /mnt/net ; do
     test "x$server" = xask || sleep 2
-    dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" --cancel-label "Redetect Network" 0 75 15 "${all_servers[@]}"
+    dialog 2>/tmp/selection --backtitle "$title" --no-shadow --cancel-label "Redetect Network" --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${all_servers[@]}"
     read n n2 server dir </tmp/selection
     case "$n" in
 	"RENAMED")
@@ -133,7 +133,7 @@ while [ ! -e "$iso" ] ; do
 	args[$i]="`echo *-$f.iso`"
 	i=$(($i+1))
     done
-    dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --menu "Please select image" --cancel-label "Back" 0 0 0 "${args[@]}"
+    dialog 2>/tmp/selection --backtitle "$title" --no-shadow --cancel-label "Back" --menu "Please select image" 0 0 0 "${args[@]}"
     image="`cat /tmp/selection`"
     test "x$image" = x && exec $0 "$@"
     iso="`echo *-$image.iso`"
@@ -178,7 +178,7 @@ while [ ! -e "$device" ] ; do
 	EOACCEPT
     fdisk -l | grep '^Disk /dev' >>/tmp/msg
 
-    dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
+    dialog --backtitle "$title" --no-shadow --no-collapse --cr-wrap --ok-label OK --cancel-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
     case $? in
 	0)
 	device="/dev/$disk"
@@ -201,7 +201,7 @@ case "$file" in
 *.gz)	expand="gunzip"		;;
 esac
 progress=""
-test -x /dcounter -a "$sizeM" -gt 0 && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "Network Image Installer - V $version" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
+test -x /dcounter -a "$sizeM" -gt 0 && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "$title" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
 
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 
