@@ -32,7 +32,6 @@ mkdir -p /mnt/net /mnt/iso
 server=ask
 dir=ask
 image=ask
-dialog=true
 # Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
 version="`cat /etc/ImageVersion`"
 
@@ -40,9 +39,8 @@ version="`cat /etc/ImageVersion`"
 all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images" 3 "hewson:/data        image")
 
 # Get args from boot line and addon commandline in /
-test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image=\|dialog='`
-eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image=\|dialog='`
-test "x$dialog" = xtrue || dialog=false
+test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image='`
+eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image='`
 
 # Get supposed harddisk
 # Find largest disk
@@ -57,13 +55,11 @@ fi
 # Get network configuration
 #
 
-# TODO: this might still call dialog
 /netconf.sh
 netdev="`cat /tmp/net_device 2>/dev/null`"
 
 # Check if network is available
 if [ "x$netdev" = x ] ; then
-    # TODO: this only calls dialog
     dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label "Redetect Network" --no-label "Reboot" --extra-button --extra-label "Continue" --yesno "Cannot connect to any network.\nRetry, reboot, or continue after fixing manually." 0 0
     case $? in
     0)  # Redetect
@@ -84,51 +80,26 @@ if [ "x$netspeed" = x ] ; then
 fi
 net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
-if $dialog ; then :; else
-    cat <<-EOINI
-	
-	
-	===== Network Image Installer =====
-	
-	
-	net    = $net
-	disk   = $disk
-	
-	server = $server
-	dir    = $dir
-	image  = $image
-	
-	
-	EOINI
-fi
 
 #
 # Find compressed image
 #
 
 while ! mount -o ro $server /mnt/net ; do
-    if $dialog ; then
-        test "x$server" = xask || sleep 2
-	dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" --cancel-label "Redetect Network" 0 75 15 "${all_servers[@]}"
-	read n n2 server dir </tmp/selection
-	case "$n" in
-	    "RENAMED")
-	    	;;
-	    "")
-	    	exit 1
-	    	;;
-	    *)
-	    	echo ${all_servers[$(($n * 2 - 1))]} >/tmp/selection
-		read server dir </tmp/selection
-		;;
-	    esac
-    else
-        test "x$server" = xask || echo "Cannot mount server $server"
-	echo "Known servers: " "${all_servers[@]}"
-	echo -n "Please enter server:directory (or press enter to leave): "
-	read server
-	test "x$server" = x && exit 1
-    fi
+    test "x$server" = xask || sleep 2
+    dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --inputmenu "Please select server:directory and subdirectory via $net" --cancel-label "Redetect Network" 0 75 15 "${all_servers[@]}"
+    read n n2 server dir </tmp/selection
+    case "$n" in
+	"RENAMED")
+	;;
+	"")
+	exit 1
+	;;
+	*)
+	echo ${all_servers[$(($n * 2 - 1))]} >/tmp/selection
+	read server dir </tmp/selection
+	;;
+    esac
 done
 
 while ! cd /mnt/net/$dir ; do
@@ -153,28 +124,21 @@ test "x$image" = "xlatest" && image="`echo "$vers" | tail -1`"
 iso="`echo *-$image.iso`"
 while [ ! -e "$iso" ] ; do
     test "x$image" = xask || echo "Cannot find selected image $image"
-    if $dialog ; then
-        test "x$image" = xask || sleep 2
-	unset args
-	i=0
-	for f in $vers ; do
-	    args[$i]=$f
-	    i=$(($i+1))
-	    args[$i]="`echo *-$f.iso`"
-	    i=$(($i+1))
-	done
-	dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --menu "Please select image" --cancel-label "Back" 0 0 0 "${args[@]}"
-	image="`cat /tmp/selection`"
-	test "x$image" = x && exec $0 "$@"
-    else
-	echo -n "Please select image (or press enter to leave): "
-	read image
-	test "x$image" = x && exit 1
-    fi
+    test "x$image" = xask || sleep 2
+    unset args
+    i=0
+    for f in $vers ; do
+	args[$i]=$f
+	i=$(($i+1))
+	args[$i]="`echo *-$f.iso`"
+	i=$(($i+1))
+    done
+    dialog 2>/tmp/selection --backtitle "Network Image Installer - V $version" --no-shadow --menu "Please select image" --cancel-label "Back" 0 0 0 "${args[@]}"
+    image="`cat /tmp/selection`"
+    test "x$image" = x && exec $0 "$@"
     iso="`echo *-$image.iso`"
 done
 
-$dialog || echo "Found image $server/$dir/$iso"
 if mount -o loop,ro -t udf "$iso" /mnt/iso ; then :; else
     echo "mounting $iso on /mnt/iso failed"
     sleep 2
@@ -191,7 +155,6 @@ if [ ! -e "$file" ] ; then
     exit 1
 fi
 
-$dialog || echo "Found compressed image $file"
 read sum1 blocks blocksize remain <"$file.md5"
 size=$(($blocks * $blocksize))
 sizeM=$(($size / 1048576))
@@ -215,28 +178,20 @@ while [ ! -e "$device" ] ; do
 	EOACCEPT
     fdisk -l | grep '^Disk /dev' >>/tmp/msg
 
-    if $dialog ; then
-	dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
-	case $? in
+    dialog --backtitle "Network Image Installer - V $version" --no-shadow --no-collapse --cr-wrap --yes-label OK --no-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
+    case $? in
 	0)
-	    device="/dev/$disk"
-	    ;;
-	3)
-	    echo -n "Please enter drive: "
-	    read disk
-	    test "x$disk" = x && exit 1
-	    ;;
-	*)
-	    exec $0 "$@"
-	    ;;
-	esac
-    else
-	cat /tmp/msg
-	echo ">>> Press <return> to continue, enter anything else to abort <<<"
-	read i
-	test "x$i" = x || exit 1
 	device="/dev/$disk"
-    fi
+	;;
+	3)
+	echo -n "Please enter drive: "
+	read disk
+	test "x$disk" = x && exit 1
+	;;
+	*)
+	exec $0 "$@"
+	;;
+    esac
 done
 
 # Dump on disk
@@ -246,7 +201,7 @@ case "$file" in
 *.gz)	expand="gunzip"		;;
 esac
 progress=""
-test -x /dcounter -a "$sizeM" -gt 0 && $dialog && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "Network Image Installer - V $version" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
+test -x /dcounter -a "$sizeM" -gt 0 && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "Network Image Installer - V $version" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
 
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 
