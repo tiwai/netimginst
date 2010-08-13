@@ -46,6 +46,8 @@
         <file name="/root/*"/>
         <file name="/installer.sh"/>
         <file name="/network.sh"/>
+        <file name="/otheros.sh"/>
+        <file name="/setupgrubfornfsinstall"/>
 	<file name="/etc/init.d/boot.local"/>
 	<file name="/etc/init.d/firstboot"/>
 	<file name="/etc/zypp/*"/>
@@ -175,6 +177,7 @@
     <package name="nfsidmap"/>
     <package name="openslp"/>
     <package name="openssh"/>
+    <package name="openSUSE-build-key"/>
     <package name="pam"/>
     <package name="pam-config"/>
     <package name="pam-modules"/>
