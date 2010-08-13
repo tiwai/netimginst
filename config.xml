@@ -13,7 +13,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3">split</type>
 <!-- addon: iso image -->
     <type flags="clic" boot="isoboot/suse-11.3">iso</type>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>

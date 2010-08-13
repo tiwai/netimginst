@@ -1,3 +1,9 @@
+1.4.0
+
+ * Add support to install other OSes via setupgrubfornfsinstall
+   (from Ludwig Nussel)
+ * Correct zypper repos to those of actually 11.3
+
 1.3.0
 
  * Allows restarting without network reconfiguration, enable going back in dialogs.
