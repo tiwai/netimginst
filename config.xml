@@ -85,6 +85,7 @@
     <package name="bzip2"/>
     <package name="coreutils"/>
     <package name="cpio"/>
+    <package name="curl"/>
 <!--    <package name='dbus-1'/>
     <package name='dbus-1-glib'/> -->
     <package name="dhcpcd"/>
@@ -172,6 +173,7 @@
     <package name="netcfg"/>
     <package name="nfs-client"/>
     <package name="nfsidmap"/>
+    <package name="openslp"/>
     <package name="openssh"/>
     <package name="pam"/>
     <package name="pam-config"/>
