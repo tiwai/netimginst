@@ -200,6 +200,7 @@
     <package name="syslog-ng"/>
     <package name="sysvinit"/>
     <package name="tar"/>
+    <package name="tcpdump"/>
     <package name="tcpd"/>
     <package name="terminfo-base"/>
     <package name="udev"/>
@@ -215,6 +216,7 @@
     <package name="kernel-firmware"/>
     <package name="rfkill"/>
     <package name="wireless-tools"/>
+    <package name="wireshark"/>
     <package name="wpa_supplicant"/>
     <package name="zd1211-firmware"/>
   </packages>
