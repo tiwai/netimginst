@@ -28,7 +28,7 @@ test "$sizeM" -gt 0 && sizeM=$(($sizeM / 1048576))
 progress=""
 test -x /inst/dcounter -a "$sizeM" -gt 0 && progress='/inst/dcounter -s $sizeM | '
 
-eval "curl -s \"$url\" | $progress dd of=$owndisk bs=1M"
+eval "curl -s \"$url\" | $progress dd of=$owndisk oflag=dsync bs=1M"
 
 if [ $? != 0 ] ; then
     echo ""
