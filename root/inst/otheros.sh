@@ -109,7 +109,7 @@ if [ ! -e /boot.off ] ; then
 fi
 
 sleep 2
-/setupgrubfornfsinstall && do_reboot
+/inst/setupgrubfornfsinstall && do_reboot
 
 rm /boot
 mv /boot{.off,}

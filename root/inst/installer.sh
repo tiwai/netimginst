@@ -106,7 +106,7 @@ while ! mount -o ro $server /mnt/net ; do
 	;;
     x)
         trap "" EXIT
-	/otheros.sh "$disk" || (echo "Sleeping 60 seconds - Press Ctrl-C to continue"; sleep 60)
+	/inst/otheros.sh "$disk" || (echo "Sleeping 60 seconds - Press Ctrl-C to continue"; sleep 60)
         do_restart
 	;;
     *)
@@ -215,7 +215,7 @@ case "$file" in
 *.gz)	expand="gunzip"		;;
 esac
 progress=""
-test -x /dcounter -a "$sizeM" -gt 0 && progress='((/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "$title" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
+test -x /inst/dcounter -a "$sizeM" -gt 0 && progress='((/inst/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "$title" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
 
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk bs=1M" || exit 1
 

@@ -64,10 +64,10 @@ sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
 # <id>:<runlevels>:<action>:<process>
 # The "id" field  MUST be the same as the last
 # characters of the device (after "tty").
-1:2345:respawn:/sbin/mingetty --login /netimginst.sh --autologin root --noissue tty1
-2:2345:respawn:/sbin/mingetty --login /bash.sh --autologin root --noissue tty2
-3:2345:respawn:/sbin/mingetty --login /bash.sh --autologin root --noissue tty3
-4:2345:respawn:/sbin/mingetty --login /bash.sh --autologin root --noissue tty4
+1:2345:respawn:/sbin/mingetty --login /inst/netimginst.sh --autologin root --noissue tty1
+2:2345:respawn:/sbin/mingetty --login /inst/bash.sh --autologin root --noissue tty2
+3:2345:respawn:/sbin/mingetty --login /inst/bash.sh --autologin root --noissue tty3
+4:2345:respawn:/sbin/mingetty --login /inst/bash.sh --autologin root --noissue tty4
 5:2345:respawn:/sbin/mingetty tty5
 6:2345:respawn:/sbin/mingetty tty6
 #

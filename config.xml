@@ -13,7 +13,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3">split</type>
 <!-- addon: iso image -->
     <type flags="clic" boot="isoboot/suse-11.3">iso</type>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
@@ -44,10 +44,7 @@
         <file name="/boot/*"/>
         <file name="/root"/>
         <file name="/root/*"/>
-        <file name="/installer.sh"/>
-        <file name="/network.sh"/>
-        <file name="/otheros.sh"/>
-        <file name="/setupgrubfornfsinstall"/>
+	<file name="/inst/*"/>
 	<file name="/etc/init.d/boot.local"/>
 	<file name="/etc/init.d/firstboot"/>
 	<file name="/etc/zypp/*"/>
