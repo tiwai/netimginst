@@ -22,10 +22,21 @@ do_reboot() {
     sleep 10000
 }
 
-progress=""
-test -x /inst/dcounter -a "$sizeM" -gt 0 && progress='((/inst/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "$title" --stdout --gauge "Dumping $image to $disk via $net" 0 75 ) 2>&1) | '
+sizeM=`curl -I -s "$url" | sed -e '/^Content-Length:/!d; s/.* //;s/\s//g'`
+test "$sizeM" -gt 0 && sizeM=$(($sizeM / 1048576))
 
-eval "curl -s \"$url\" | $progress dd of=/dev/$owndisk bs=1M" || exit 1
+progress=""
+test -x /inst/dcounter -a "$sizeM" -gt 0 && progress='/inst/dcounter -s $sizeM | '
+
+eval "curl -s \"$url\" | $progress dd of=$owndisk bs=1M"
+
+if [ $? != 0 ] ; then
+    echo ""
+    echo "FAILED !"
+    echo ""
+    sleep 5
+fi
+sync
 
 echo "Done. Rebooting"
 

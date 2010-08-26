@@ -28,20 +28,20 @@ if [ "x$netdev" != x -a "x$owndisk" != x ] ; then
 	if [ "${new/.i?86/}" != "$vers" ] ; then
 	    if curl -f -s -I "$nii_url/$new.raw" > /dev/null ; then
 		cat >/tmp/msg <<- EOUPDATE
-		There is a new NetworkImageInstaller available. Update?
+		There is a new NetworkImageInstaller available.
+		Update USB stick?
+
 		This is       $vers
 		Available is  ${new/.i?86/}
 		
 		Update via $net on drive $owndisk?
 		This will destroy all data! Make sure the right disk is used!
-		
 		EOUPDATE
 		fdisk -l | grep '^Disk /dev' >>/tmp/msg
-		dialog --backtitle "$vers" --no-shadow --no-collapse --cr-wrap --ok-label "Update" --cancel-label "Continue" --yesno "`cat /tmp/mgs`" 20 70
+		dialog --backtitle "$vers" --no-shadow --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --yesno "`cat /tmp/msg`" 20 70
 		case $? in
 		0)
-		    /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$new.raw" "$owndisk"
-		    # Doesn't return
+		    exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$new.raw" "$owndisk"
 		    ;;
     		esac
 	    fi
