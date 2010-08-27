@@ -1,3 +1,8 @@
+2.1.0
+
+ * Add minor update (scripts only)
+ * Add strace, dialog colors
+
 2.0.0
 
  * Make USB stick self-updateable
