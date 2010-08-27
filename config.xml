@@ -13,7 +13,7 @@
     <type fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3">split</type>
 <!-- addon: iso image -->
     <type flags="clic" boot="isoboot/suse-11.3">iso</type>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <packagemanager>zypper</packagemanager>
     <rpm-check-signatures>false</rpm-check-signatures>
     <rpm-force>false</rpm-force>
@@ -193,6 +193,7 @@
     <package name="rpm"/>
     <package name="sed"/>
     <package name="setserial"/>
+    <package name="strace"/>
     <package name="sysconfig"/>
     <package name="syslog-ng"/>
     <package name="sysvinit"/>
