@@ -91,7 +91,7 @@ for n in $ifaces ; do
     echo "Test network connection on $n..."
     # Wireless
     echo "   Found carrier, configuring"
-    dialog 2>/tmp/pwd --cr-wrap --no-lines --insecure --mixedform "Enter Innerweb credentials for wireless connection on secure network 'Novell'.\nPress <Cursor-Down> to switch to password field.\n" 15 60 5 User 2 0 "" 2 15 31 30 0 Password 4 0 "" 4 15 31 30 1
+    DIALOGRC=/inst/dialogrc-wlan dialog 2>/tmp/pwd --cr-wrap --no-lines --insecure --mixedform "Enter Innerweb credentials for wireless connection on secure network 'Novell'.\nPress <Cursor-Down> to switch to password field.\n" 15 60 5 User 2 0 "" 2 15 31 30 0 Password 4 0 "" 4 15 31 30 1
     if [ $? != 0 ] ; then
 	rm -f /tmp/pwd
 	continue
