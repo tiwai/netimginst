@@ -13,7 +13,7 @@ if [ "x$1" != x- ] ; then
     echo "Bootstrapping Phase 1"
     echo "$*"
 
-    mkdir /t
+    mkdir -p /t
     mount -osize=256M,nr_inodes=20000 -t tmpfs /dev/shm /t/
     mkdir /t/lib /t/bin /t/inst
     cp -L /lib/* /t/lib/                                 2>/dev/null
