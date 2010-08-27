@@ -1,3 +1,8 @@
+2.0.0
+
+ * Make USB stick self-updateable
+ * Add more debugging tools (tcpdump, wireshark)
+
 1.4.0
 
  * Add support to install other OSes via setupgrubfornfsinstall
