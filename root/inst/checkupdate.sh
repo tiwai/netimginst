@@ -1,10 +1,18 @@
 #!/bin/bash
 
+# Usage: $0              - check for updates via Changelog
+#        $0 [new]        - check for update to [new]
+#        $0 [new] [old]  - check for update to [new] from [old]
+
+force_new="$1"
+force_old="$2"
+
 nii_url="http://ivanova.suse.de/NetworkImageInstaller"
 chlog="Changelog"
 tarbase="update-"
 base="Network_Image_Installer.i686-"
 vers="`sed -e 's/.*-//' < /etc/ImageVersion`"
+vers=${force_old:-$vers}
 
 owndisk="`cat /proc/mounts | sed -e '/\/read-write /!d; s/[0-9]\+ .*//'`"
 if [ "x$owndisk" == x -o ! -e "$owndisk" ] ; then
@@ -26,8 +34,9 @@ net="${netdev:-[no net]} (${netspeed}Mb/s)"
 if [ "x$netdev" != x -a "x$owndisk" != x ] ; then
     if curl -s -f -o /tmp/chlog "$nii_url/$chlog" >/dev/null ; then
 	new="`head -1 /tmp/chlog`"
+	new=${force_new:-$new}
 	if [ "$new" != "$vers" ] ; then
-	    if [ "${new%.*}" == "${vers%.*}" ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/$tarbase$new.tar.gz" ; then
+	    if [ -e /inst/selfminorupdate.sh -a "${new%.*}" == "${vers%.*}" ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/$tarbase$new.tar.gz" ; then
 		cat >/tmp/msg <<- EOUPDATE
 		A new minor version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
 		Update USB stick via $net (scripts only) ?
@@ -39,7 +48,7 @@ if [ "x$netdev" != x -a "x$owndisk" != x ] ; then
 		DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
 		exit 0
 	    fi
-	    if curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
+	    if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
 		diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
 		cat >/tmp/msg <<- EOUPDATE
 		A new major version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)

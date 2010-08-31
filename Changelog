@@ -1,3 +1,13 @@
+2.2.0
+
+ * Install recovery.tar.gz if available
+   (it's faster over net than from disk...)
+ * Boot stick even if a lvm group is available on disk
+ * Enable inst/checkupdate.sh to be called with explicit version number
+ * Add lvm support
+ * Update xml schema to 4.7
+ * Disable (major) update on iso images
+
 2.1.0
 
  * Add minor update (scripts only)

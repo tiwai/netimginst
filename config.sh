@@ -6,7 +6,7 @@ test -f /.profile && . /.profile
 test -f /kconfig && . /kconfig 
 rm /kconfig
 
-echo "Configure image: [$name]..."
+echo "Configure image: [$kiwi_iname] type [$kiwi_type]..."
 
 suseConfig
 /sbin/ldconfig
@@ -47,5 +47,11 @@ sed -i -e 's/^ENABLE_SYSRQ=.*/ENABLE_SYSRQ="yes"/' /etc/sysconfig/sysctl
 
 # Remove potentially available network configurations
 find /etc/sysconfig/network \( -name ifcfg-\* -a \! -name ifcfg-lo \) -exec rm \{\} \;
+
+# Remove major self update possibility on iso images
+if [ "x$kiwi_type" = xiso -o "x$kiwi_type" = xsplit ] ; then
+    echo "Removing self update script for image type $kiwi_type"
+    rm -f /inst/selfupdate.sh
+fi
 
 true

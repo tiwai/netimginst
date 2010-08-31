@@ -34,7 +34,7 @@ if [ ! -d /mnt/disk ] ; then
 	This will destroy all data! Make sure the right disk is used!
 	
 	EOACCEPT
-    fdisk -l | grep '^Disk /dev' >>/tmp/msg
+    fdisk -l | grep '^Disk /dev/sd' >>/tmp/msg
 
     dialog --backtitle "$title" --no-shadow --no-collapse --cr-wrap --ok-label OK --cancel-label Back --extra-button --extra-label "Change Drive" --yesno "`cat /tmp/msg`" 0 0
     case $? in
