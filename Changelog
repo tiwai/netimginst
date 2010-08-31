@@ -1,3 +1,9 @@
+2.2.1
+
+ * Improve recovery tarball deployment speed greatly
+ * Show speed indicator during deployment
+ * Add gauge to selfupdater
+
 2.2.0
 
  * Install recovery.tar.gz if available

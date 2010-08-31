@@ -218,9 +218,10 @@ case "$file" in
 esac
 progress=""
 test -x /inst/dcounter -a "$sizeM" -gt 0 && progress='((/inst/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "$title" --no-shadow --stdout --gauge "$proginfo" 0 75 ) 2>&1) | '
+test -x /inst/dia_gauge -a "$sizeM" -gt 0 && progress='(/inst/dia_gauge $sizeM "$proginfo - %.1f MB/s" | dialog --backtitle "$title" --no-shadow --stdout --gauge "$proginfo" 0 75 ) 2>&1 | '
 
 proginfo="Dumping $image to $disk via $net"
-eval "$expand < \"$file\" | $progress dd of=/dev/$disk oflag=dsync bs=1M" || exit 1
+eval "$expand < \"$file\" | $progress dd of=/dev/$disk oflag=dsync bs=1M 2>/dev/null" || exit 1
 
 # if recovery tarball available and not on disk, mount disk and copy
 if [ -e "${iso%.iso}.recovery.tar.gz" ] ; then
@@ -246,7 +247,7 @@ if [ -e "${iso%.iso}.recovery.tar.gz" ] ; then
     if [ "x$part" != x ] ; then
 	if mount $part /mnt/disk ; then
 	    proginfo="Dumping recovery tarball to $part via $net"
-	    eval "dd if=\"${iso%.iso}.recovery.tar.gz\" | $progress dd of=/mnt/disk/recovery.tar.gz oflag=dsync bs=1M" || exit 1
+	    eval "dd if=\"${iso%.iso}.recovery.tar.gz\" bs=1M 2>/dev/null | $progress dd of=/mnt/disk/recovery.tar.gz oflag=dsync bs=1M 2>/dev/null" || exit 1
 	    umount /mnt/disk
 	fi
     fi

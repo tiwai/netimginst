@@ -63,6 +63,22 @@ if [ "x$netdev" != x -a "x$owndisk" != x ] ; then
 		DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base$new.raw" "$owndisk"
 		exit 0
 	    fi
+	    if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base${new%.*}.0.raw" > /dev/null ; then
+		diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
+		cat >/tmp/msg <<- EOUPDATE
+		A new major version update is available:  \\Z7\\Zb${new%.*}.0\\Zn  (current: $vers)
+		Additionally a minor update to \\Z7\\Zb$new\\Zn will be required afterwards.
+		
+		Update USB stick via $net on $diskdef ?
+		\\Z1This will destroy all data! Make sure the right disk is used!\\Zn
+
+		Changes:\\Zb
+
+		EOUPDATE
+		sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
+		DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base${new%.*}.0.raw" "$owndisk"
+		exit 0
+	    fi
 	fi
     fi
 fi
