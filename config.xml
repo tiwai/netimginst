@@ -23,6 +23,7 @@
 					<except name="/etc/init.d/boot.local"/>
 					<except name="/etc/init.d/firstboot"/>
 					<except name="/etc/zypp/*"/>
+					<except name="/etc/ImageVersion"/>
 					<file name="/mnt"/>
 					<file name="/mnt/*"/>
 					<file name="/tmp"/>
@@ -39,6 +40,7 @@
 					<file name="/etc/init.d/boot.local"/>
 					<file name="/etc/init.d/firstboot"/>
 					<file name="/etc/zypp/*"/>
+					<file name="/etc/ImageVersion"/>
 				</persistent>
 			</split>
 			<lvmvolumes lvmgroup="niiVG"/>
