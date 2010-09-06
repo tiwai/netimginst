@@ -23,7 +23,25 @@ do_reboot() {
 }
 
 
+mkdir -p /mnt/disk
 if [ ! -d /mnt/disk ] ; then
+    echo "Cannot create /mnt/disk"
+    exit 1
+fi
+
+# determine the disk that is mounted there
+device="`df /mnt/disk | sed -e '/^\/dev/!d;s/^\/dev\/\([^ ]*\) .*/\1/'`"
+rootdev="`df / | sed -e '/^\/dev/!d;s/^\/dev\/\([^ ]*\) .*/\1/'`"
+if [ "x$device" = x -o "$device" = "$rootdev" ] ; then
+  echo "Illegal or usb device $device - retrying with partitioning"
+  umount -f /mnt/disk
+  part=/bin/true
+else
+  part=/bin/false
+fi
+
+
+if $part ; then
 # If /mnt/disk doesn't exist yet, the disk isn't partitioned + grub setup yet
 
   device=ask
@@ -87,17 +105,6 @@ if [ ! -d /mnt/disk ] ; then
   echo -e "grub:  root $grubpart ; setup --force-lba $grubdev $grubpart"
 
   trap "test -e /boot.off && rm /boot && mv /boot{.off,}" EXIT
-
-else
-# If /mnt/disk exists, determine the disk that is mounted there
-
-  device="`df /mnt/disk | sed -e '/^\/dev/!d;s/^\/dev\/\([^ ]*\) .*/\1/'`"
-  rootdev="`df / | sed -e '/^\/dev/!d;s/^\/dev\/\([^ ]*\) .*/\1/'`"
-  if [ "x$device" = x -o "$device" = "$rootdev" ] ; then
-    echo "Illegal or usb device $device - not continuing"
-    sleep 2
-    exit 1
-  fi
 
 fi
 
