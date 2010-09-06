@@ -4,6 +4,10 @@
 # Init
 #
 
+# V2.2.x only: Copy back wrongly updated scripts to disk
+test -d /read-write && (cd /inst; for f in * ; do test -L $f || cp $f /read-write/inst/ ; done)
+
+
 # On exit cleanup
 trap "cd /; umount 2>/dev/null /mnt/disk; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
 set +H
