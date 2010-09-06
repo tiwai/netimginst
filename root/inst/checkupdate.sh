@@ -31,56 +31,76 @@ net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
 
 # Check if update is available
-if [ "x$netdev" != x -a "x$owndisk" != x ] ; then
-    if curl -s -f -o /tmp/chlog "$nii_url/$chlog" >/dev/null ; then
-	new="`head -1 /tmp/chlog`"
-	new=${force_new:-$new}
-	if [ "$new" != "$vers" ] ; then
-	    if [ -e /inst/selfminorupdate.sh -a "${new%.*}" == "${vers%.*}" ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/$tarbase$new.tar.gz" ; then
-		cat >/tmp/msg <<- EOUPDATE
-		A new minor version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
-		Update USB stick via $net (scripts only) ?
+test "x$netdev" != x -a "x$owndisk" != x  || exit 0
+rm -f /tmp/chlog /tmp/chlog2
+curl -s -f -o /tmp/chlog "$nii_url/$chlog" >/dev/null
+curl -s -f -o /tmp/chlog2 "$nii_url/current" >/dev/null
+test -e /tmp/chlog -o -e /tmp/chlog2 || exit 0
 
-		Changes:\\Zb
+test -e /tmp/chlog  || cp /tmp/chlog2 /tmp/chlog
+new="`head -1 /tmp/chlog`"
+test -e /tmp/chlog2 && new="`head -1 /tmp/chlog2`"
+echo "Version: $vers   New: $new"
 
-		EOUPDATE
-		sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-		DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
-		exit 0
-	    fi
-	    if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
-		diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
-		cat >/tmp/msg <<- EOUPDATE
-		A new major version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
-		
-		Update USB stick via $net on $diskdef ?
-		\\Z1This will destroy all data! Make sure the right disk is used!\\Zn
+new=${force_new:-$new}
+test "$new" = "$vers" && exit 0
 
-		Changes:\\Zb
-
-		EOUPDATE
-		sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-		DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base$new.raw" "$owndisk"
-		exit 0
-	    fi
-	    if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base${new%.*}.0.raw" > /dev/null ; then
-		diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
-		cat >/tmp/msg <<- EOUPDATE
-		A new major version update is available:  \\Z7\\Zb${new%.*}.0\\Zn  (current: $vers)
-		Additionally a minor update to \\Z7\\Zb$new\\Zn will be required afterwards.
-		
-		Update USB stick via $net on $diskdef ?
-		\\Z1This will destroy all data! Make sure the right disk is used!\\Zn
-
-		Changes:\\Zb
-
-		EOUPDATE
-		sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-		DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base${new%.*}.0.raw" "$owndisk"
-		exit 0
-	    fi
-	fi
-    fi
+if [ -e /inst/selfminorupdate.sh -a "${new%.*}" == "${vers%.*}" ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/$tarbase$new.tar.gz" ; then
+    cat >/tmp/msg <<- EOUPDATE
+	A new minor version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
+	Update USB stick via $net (scripts only) ?
+	
+	Changes:\\Zb
+	
+	EOUPDATE
+    sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
+    exit 0
+fi
+if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
+    diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
+    cat >/tmp/msg <<- EOUPDATE
+	A new major version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
+	
+	Update USB stick via $net on $diskdef ?
+	\\Z1This will destroy all data! Make sure the right disk is used!\\Zn
+	
+	Changes:\\Zb
+	
+	EOUPDATE
+    sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base$new.raw" "$owndisk"
+    exit 0
+fi
+if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base${new%.*}.0.raw" > /dev/null ; then
+    diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
+    cat >/tmp/msg <<- EOUPDATE
+	A new major version update is available:  \\Z7\\Zb${new%.*}.0\\Zn  (current: $vers)
+	Additionally a minor update to \\Z7\\Zb$new\\Zn will be required afterwards.
+	
+	Update USB stick via $net on $diskdef ?
+	\\Z1This will destroy all data! Make sure the right disk is used!\\Zn
+	
+	Changes:\\Zb
+	
+	EOUPDATE
+    sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base${new%.*}.0.raw" "$owndisk"
+    exit 0
+fi
+if [ -e /inst/selfminorupdate.sh ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/$tarbase${vers%.*}.$((${vers##*.}+1)).tar.gz" ; then
+    cat >/tmp/msg <<- EOUPDATE
+	A new minor version update is available:  \\Z7\\Zb${vers%.*}.$((${vers##*.}+1))\\Zn  (current: $vers)
+	Additionally a major update to \\Z7\\Zb$new\\Zn will be required afterwards.
+	Update USB stick via $net (scripts only) ?
+	
+	Changes:\\Zb
+	
+	EOUPDATE
+    new=${vers%.*}.$((${vers##*.}+1))
+    sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
+    exit 0
 fi
 
 exit 0
