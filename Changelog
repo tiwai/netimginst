@@ -1,3 +1,8 @@
+2.2.6
+
+ * Use --bind mount in otheros.sh instead re-linking /boot.
+   Enables installing other OSes when using ISO images.
+
 2.2.5
 
  * Fix major self update in images (and really disallow on CDs)
