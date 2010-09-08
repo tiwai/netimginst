@@ -6,7 +6,7 @@ disk="$1"
 # Reboot hard
 do_reboot() {
     cd
-    test -e /boot.off && rm /boot && mv /boot{.off,}
+    grep /boot /proc/mounts | grep -q -v loop  && umount /boot 2>/dev/null
     umount /mnt/disk 2>/dev/null
 
     sleep 3
@@ -40,6 +40,8 @@ else
   part=/bin/false
 fi
 
+trap "cd /; umount -f /mnt/disk 2>/dev/null; grep /boot /proc/mounts | grep -q -v loop && umount /boot 2>/dev/null" EXIT
+
 
 if $part ; then
 # If /mnt/disk doesn't exist yet, the disk isn't partitioned + grub setup yet
@@ -71,8 +73,6 @@ if $part ; then
   done
   part="${device}1"
 
-  trap "cd /; umount -f /mnt/disk 2>/dev/null; rmdir /mnt/disk 2>/dev/null; test -e /boot.off && rm /boot && mv /boot{.off,}" EXIT
-
   echo -e "unit: sectors\n${part}: start=63,size=100000,Id=83,bootable" | sfdisk --force $device || exit 1
   # This is ... racy
   sleep 2
@@ -95,33 +95,24 @@ if $part ; then
 	root $grubpart
 	EOMENU
 
-  if [ ! -e /boot.off ] ; then
-    mv /boot{,.off}
-    test -e /boot && exit 1
-    ln -snf /mnt/disk/boot /boot
-  fi
+  grep /boot /proc/mounts | grep -q -v loop  || mount --bind /mnt/disk/boot /boot || exit 1
 
   echo -e "root $grubpart\nsetup --force-lba $grubdev $grubpart\nquit" | grub --batch || exit 1
   echo -e "grub:  root $grubpart ; setup --force-lba $grubdev $grubpart"
 
-  trap "test -e /boot.off && rm /boot && mv /boot{.off,}" EXIT
+else
+
+  grep /boot /proc/mounts | grep -q -v loop  || mount --bind /mnt/disk/boot /boot || exit 1
 
 fi
 
-if [ ! -e /boot.off ] ; then
-  trap "test -e /boot.off && rm /boot && mv /boot{.off,}" EXIT
-  mv /boot{,.off}
-  test -e /boot && exit 1
-  ln -snf /mnt/disk/boot /boot
-fi
 
-sleep 2
-/inst/setupgrubfornfsinstall && do_reboot
+/inst/setupgrubfornfsinstall ; res=$?
 
-rm /boot
-mv /boot{.off,}
+umount /boot
+
+test $res = 0  && do_reboot
 
 trap "" EXIT
-
 exit 1
 
