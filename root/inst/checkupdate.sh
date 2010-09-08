@@ -17,7 +17,6 @@ vers=${force_old:-$vers}
 owndisk="`cat /proc/mounts | sed -e '/\/read-write /!d; s/[0-9]\+ .*//'`"
 if [ "x$owndisk" == x -o ! -e "$owndisk" ] ; then
     echo "Cannot determine root disk"
-    sleep 2
     owndisk=""
 fi
 
@@ -31,7 +30,7 @@ net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
 
 # Check if update is available
-test "x$netdev" != x -a "x$owndisk" != x  || exit 0
+test "x$netdev" != x || exit 0
 rm -f /tmp/chlog /tmp/chlog2
 curl -s -f -o /tmp/chlog "$nii_url/$chlog" >/dev/null
 curl -s -f -o /tmp/chlog2 "$nii_url/current" >/dev/null
@@ -57,7 +56,7 @@ if [ -e /inst/selfminorupdate.sh -a "${new%.*}" == "${vers%.*}" ] && curl -s -f 
     DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
     exit 0
 fi
-if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
+if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
     diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
     cat >/tmp/msg <<- EOUPDATE
 	A new major version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
@@ -72,7 +71,7 @@ if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/n
     DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base$new.raw" "$owndisk"
     exit 0
 fi
-if [ -e /inst/selfupdate.sh ] && curl -f -s -I "$nii_url/$base${new%.*}.0.raw" > /dev/null ; then
+if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$nii_url/$base${new%.*}.0.raw" > /dev/null ; then
     diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
     cat >/tmp/msg <<- EOUPDATE
 	A new major version update is available:  \\Z7\\Zb${new%.*}.0\\Zn  (current: $vers)
