@@ -62,7 +62,9 @@
 	</users>
 	<packages patternType="onlyRequired" type="image">
 		<package name="aaa_base"/>
+		<package name="autofs"/>
 		<package name="bash"/>
+		<package name="bind-utils"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="bzip2"/>
 		<package name="coreutils"/>
@@ -147,6 +149,7 @@
 		<package name="module-init-tools"/>
 		<package name="ncurses-utils"/>
 		<package name="net-tools"/>
+		<package name="netcat"/>
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
 		<package name="nfsidmap"/>
@@ -182,6 +185,7 @@
 		<package name="util-linux"/>
 		<package name="vim"/>
 		<package name="wget"/>
+		<package name="ypbind"/>
 		<package name="zlib"/>
 		<!-- wireless related -->
 		<package name="atmel-firmware"/>
