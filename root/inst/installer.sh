@@ -96,7 +96,7 @@ net="${netdev:-[no net]} (${netspeed}Mb/s)"
 # Find compressed image
 #
 
-while ! mount -o ro $server /mnt/net ; do
+while ! mount -o ro,nolock $server /mnt/net ; do
     test "x$server" = xask || sleep 2
     dialog 2>/tmp/selection --backtitle "$title" --no-shadow --cancel-label "Redetect Network" --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${all_servers[@]}"
     read n n2 server dir </tmp/selection
