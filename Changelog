@@ -1,3 +1,9 @@
+2.3.0
+
+ * Use factory instead of 11.3
+ * Mount $server with nolock option
+ * Add ypbind, autofs, bind-utils, netcat
+
 2.2.6
 
  * Use --bind mount in otheros.sh instead re-linking /boot.
