@@ -143,6 +143,7 @@
 		<package name="logrotate"/>
 		<package name="lsof"/>
 		<package name="lvm2"/>
+		<package name="lynx"/>
 		<package name="mdadm"/>
 		<package name="mingetty"/>
 		<package name='mkinitrd'/>
