@@ -1,0 +1,7 @@
+[openSUSE_Factory_OSS]
+name=openSUSE_Factory_OSS
+baseurl=http://download.opensuse.org/factory/repo/oss/
+type=yast2
+enabled=1
+autorefresh=1
+gpgcheck=1

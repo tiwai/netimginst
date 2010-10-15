@@ -203,12 +203,12 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 	</packages>
-	<repository type="rpm-md">
-		<!-- <source path="http://download.opensuse.org/update/11.3"/> -->
-		<source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/update/11.3/"/>
-	</repository>
 	<repository type="yast2">
-		<!-- <source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/> -->
-		<source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/distribution/11.3/repo/oss/"/>
+		<!--<source path="/mounts/mirror/SuSE/ftp.opensuse.org/srv/ftp/pub/opensuse/update/11.3/"/>-->
+		<source path="/mounts/machcd3/factory/stable-x86/"/>
 	</repository>
+	<!--<repository type="yast2">
+		<source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/>
+		<source path="http://download.opensuse.org/factory/repo/oss/"/>
+	</repository>-->
 </image>
