@@ -5,5 +5,6 @@ test -d /read-write || rm -f /inst/selfupdate.sh
 
 /inst/network.sh
 /inst/checkupdate.sh
+test -e /tmp/selfupdate.cmd && source /tmp/selfupdate.cmd
 exec /inst/installer.sh
 

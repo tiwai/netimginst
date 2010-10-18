@@ -4,6 +4,8 @@
 #        $0 [new]        - check for update to [new]
 #        $0 [new] [old]  - check for update to [new] from [old]
 
+# Returns command for update in /tmp/selfupdate.cmd if required
+
 force_new="$1"
 force_old="$2"
 
@@ -13,6 +15,8 @@ tarbase="update-"
 base="Network_Image_Installer.i686-"
 vers="`sed -e 's/.*-//' < /etc/ImageVersion`"
 vers=${force_old:-$vers}
+cmdfile="/tmp/selfupdate.cmd"
+rm -f $cmdfile
 
 owndisk="`cat /proc/mounts | sed -e '/\/read-write /!d; s/[0-9]\+ .*//'`"
 if [ "x$owndisk" == x -o ! -e "$owndisk" ] ; then
@@ -53,7 +57,7 @@ if [ -e /inst/selfminorupdate.sh -a "${new%.*}" == "${vers%.*}" ] && curl -s -f 
 	
 	EOUPDATE
     sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/selfminorupdate.sh '$new' /tmp/files.tar.gz"
     exit 0
 fi
 if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$nii_url/$base$new.raw" > /dev/null ; then
@@ -68,7 +72,7 @@ if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$nii_url/$ba
 	
 	EOUPDATE
     sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base$new.raw" "$owndisk"
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/bootstrap.sh /inst/selfupdate.sh '$nii_url/$base$new.raw' '$owndisk'"
     exit 0
 fi
 if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$nii_url/$base${new%.*}.0.raw" > /dev/null ; then
@@ -84,7 +88,7 @@ if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$nii_url/$ba
 	
 	EOUPDATE
     sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/bootstrap.sh /inst/selfupdate.sh "$nii_url/$base${new%.*}.0.raw" "$owndisk"
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/bootstrap.sh /inst/selfupdate.sh '$nii_url/$base${new%.*}.0.raw' '$owndisk'"
     exit 0
 fi
 if [ -e /inst/selfminorupdate.sh ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/$tarbase${vers%.*}.$((${vers##*.}+1)).tar.gz" ; then
@@ -98,7 +102,7 @@ if [ -e /inst/selfminorupdate.sh ] && curl -s -f -o /tmp/files.tar.gz "$nii_url/
 	EOUPDATE
     new=${vers%.*}.$((${vers##*.}+1))
     sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && exec /inst/selfminorupdate.sh "$new" /tmp/files.tar.gz
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/selfminorupdate.sh '$new' /tmp/files.tar.gz"
     exit 0
 fi
 
