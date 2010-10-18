@@ -8,6 +8,25 @@
 # - umount /read-write
 # - exec script
 
+# Reboot hard
+do_reboot() {
+    cd
+    umount /mnt/iso
+    umount /mnt/net
+
+    sleep 3
+    trap "" EXIT
+
+    sync
+    #mount -oremount,ro /
+    echo u >/proc/sysrq-trigger
+    echo s >/proc/sysrq-trigger
+    sync
+    sleep 1
+    /sbin/reboot -f
+    sleep 10000
+}
+
 if [ "x$1" != x- ] ; then
 
     echo "Bootstrapping Phase 1"
@@ -40,7 +59,13 @@ else
 
     kill -QUIT -1
     sleep 2
-    umount /read-write || mount -oremount,ro /read-write || umount -f /read-write || umount -l /read-write
+    umount /read-write || mount -oremount,ro /read-write || umount -f /read-write
+    if [ $? != 0 ] ; then
+	echo 1>&2 "* Unmounting /read-write during bootstrapping failed!"
+	echo 1>&2 "  There's nothing left to do, press return to reboot"
+	read i
+        do_reboot
+    fi
 
     echo "Execing $script $*"
     exec /t/$script "$@"
