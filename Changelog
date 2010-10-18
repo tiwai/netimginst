@@ -1,3 +1,9 @@
+2.3.1
+
+ * Increase image size (iso won't build otherwise)
+ * Fix major update (/read-write was still mounted, thus a little
+   corrupted afterwards)
+
 2.3.0
 
  * Use factory instead of 11.3

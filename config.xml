@@ -47,9 +47,9 @@
 		</type>
 		<!-- addon: iso image -->
 		<type image="iso" flags="clic" boot="isoboot/suse-11.3">
-			<size>100</size>
+		    <!-- <size>100</size> -->
 		</type>
-		<version>2.3.0</version>
+		<version>2.3.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>false</rpm-force>
