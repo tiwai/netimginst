@@ -16,6 +16,7 @@ tar -C $root -xvf "$file" || exit 1
 
 sed -i -e 's/-[.0-9]*$/-'"$vers/" $root/etc/ImageVersion
 
+sync
 echo "Done updating. Restarting..."
 sleep 2
 
