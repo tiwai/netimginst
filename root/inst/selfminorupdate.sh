@@ -14,7 +14,7 @@ test -d /read-write && root=/read-write/
 
 tar -C $root -xvf "$file" || exit 1
 
-sed -i -e 's/-[.0-9]*$/-'"$vers/" /etc/ImageVersion
+sed -i -e 's/-[.0-9]*$/-'"$vers/" $root/etc/ImageVersion
 
 echo "Done updating. Restarting..."
 sleep 2
