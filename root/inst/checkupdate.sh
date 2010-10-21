@@ -15,7 +15,7 @@ tarbase="update-"
 base="Network_Image_Installer.i686-"
 vers="`sed -e 's/.*-//' < /etc/ImageVersion`"
 vers=${force_old:-$vers}
-cmdfile="/tmp/selfupdate.cmd"
+cmdfile=/tmp/bootstrap.cmd
 rm -f $cmdfile
 
 owndisk="`cat /proc/mounts | sed -e '/\/read-write /!d; s/[0-9]\+ .*//'`"

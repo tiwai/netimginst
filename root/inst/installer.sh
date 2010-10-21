@@ -108,7 +108,8 @@ while ! mount -o ro,nolock $server /mnt/net ; do
 	;;
     x)
         trap "" EXIT
-	/inst/otheros.sh "$disk" || (echo "Sleeping 60 seconds - Press Ctrl-C to continue"; sleep 60)
+	/inst/otheros.sh "$disk" && exit 0
+	(echo "Sleeping 10 seconds - Press Ctrl-C to continue"; sleep 10)
         do_restart
 	;;
     *)

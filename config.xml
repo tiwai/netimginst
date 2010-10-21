@@ -95,6 +95,7 @@
 		<package name="iputils"/>
 		<package name="kbd"/>
 		<package name="kernel-default"/>
+		<package name="kexec-tools"/>
 		<package name="klogd"/>
 		<package name="less"/>
 		<package name="libadns1"/>
