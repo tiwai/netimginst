@@ -110,6 +110,8 @@ fi
 /inst/setupgrubfornfsinstall ; res=$?
 
 umount /boot
+umount /mnt/disk
+sync
 
 test $res = 0  && do_reboot
 
