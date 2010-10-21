@@ -1,3 +1,7 @@
+2.4.1
+
+ * Fix OtherOS installation on iso images.
+
 2.4.0
 
  * Use kexec instead of partitioning for OtherOS.
