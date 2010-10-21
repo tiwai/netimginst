@@ -29,6 +29,13 @@ do_reboot() {
 
 if [ "x$1" != x- ] ; then
 
+    if [ ! -e /read-write ] ; then
+	echo "Bootstrapping not required"
+	echo "$*"
+	sleep 1
+        exec "$@"
+    fi
+
     echo "Bootstrapping Phase 1"
     echo "$*"
 
@@ -57,9 +64,10 @@ else
     script="$1"
     shift
 
+    trap "" SIGQUIT
     kill -QUIT -1
     sleep 2
-    umount /read-write || mount -oremount,ro /read-write || umount -f /read-write
+    umount /read-write || mount -oremount,ro /read-write
     if [ $? != 0 ] ; then
 	echo 1>&2 "* Unmounting /read-write during bootstrapping failed!"
 	echo 1>&2 "  There's nothing left to do, press return to reboot"
