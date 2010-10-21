@@ -1,3 +1,8 @@
+2.3.2
+
+ * Fix minor update (old state wasn't stored) -
+   requires update to 2.3.2 twice in order to actually work
+
 2.3.1
 
  * Increase image size (iso won't build otherwise)
