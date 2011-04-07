@@ -3,7 +3,6 @@
 . /etc/sysconfig/network/scripts/functions 2>/dev/null
 rm -f /tmp/net_device
 cd /sys/class/net || exit 1
-i=10
 
 fix_net() {
     # On wireless apparently arch.suse.de is not yet available. So rather be safe than sorry
@@ -32,7 +31,6 @@ for n in $ifaces ; do
 	eth|wlan|brige|vlan|bond|tun|tap)
 	    echo "Resetting network connection on $n..."
 	    ifdown $n
-	    ifconfig $n up
 	    ;;
     esac
 done
@@ -40,8 +38,23 @@ done
 # Unblock rfkill
 rfkill unblock all
 
+# Where required, start device and wait for carrier detection to actually do something
+for n in $ifaces ; do
+    echo "Starting carrier detection on $n..."
+    i=0
+    while [ $i -lt 10 ] ; do
+	c="`cat $n/carrier 2>/dev/null`"
+	test "x$c" = x || break
+	ifconfig $n up
+	sleep 1
+	i=$(($i+1))
+    done
+done
+
 # Wait to settle carrier detection on slow devices
+echo "Waiting for carrier detection to settle..."
 sleep 3
+i=10
 
 # Try to connect to ethernet first
 for n in $ifaces ; do
@@ -71,6 +84,7 @@ for n in $ifaces ; do
 	    ;;
 	x)
 	    # Down
+	    ifconfig $n down
 	    ;;
     esac
 done
