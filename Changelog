@@ -1,3 +1,8 @@
+2.4.3
+
+ * Fix network detection:
+   Where required, start device and wait for carrier detectiond
+
 2.4.2
 
  * Update setupgrubfornfsinstall for OS11.4
