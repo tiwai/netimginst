@@ -1,3 +1,8 @@
+2.4.4
+
+ * Only use fdatasync at end, not synchronous write during dd.
+   Improves dumping speed, at the cost of exact intermediate speed rates.
+
 2.4.3
 
  * Fix network detection:
