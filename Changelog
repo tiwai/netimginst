@@ -1,3 +1,8 @@
+2.4.5
+
+ * Enable new kiwi images
+ * Only install recovery tarball if newer than iso image
+
 2.4.4
 
  * Only use fdatasync at end, not synchronous write during dd.
