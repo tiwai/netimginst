@@ -246,8 +246,12 @@ test -x /inst/dia_gauge -a "$sizeM" -gt 0 && progress='(/inst/dia_gauge $sizeM "
 proginfo="Dumping $image to $disk via $net"
 eval "$expand < \"$file\" | $progress dd of=/dev/$disk conv=fdatasync bs=1M 2>/dev/null" || exit 1
 
+umount 2>/dev/null /mnt/image
+umount 2>/dev/null /mnt/iso
+
 # if recovery tarball available and not on disk, mount disk and copy
-if [ -e "${iso%.iso}.recovery.tar.gz" ] ; then
+# Only do this if recovery tarball is NEWER than the iso image.
+if [ -e "${iso%.iso}.recovery.tar.gz" -a "${iso%.iso}.recovery.tar.gz" -nt "$iso" ] ; then
     sizeM=$(($(stat -c %s "${iso%.iso}.recovery.tar.gz") / 1048576))
     echo "Detecting root partition..."
     /sbin/blockdev --rereadpt /dev/$disk
