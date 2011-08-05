@@ -5,15 +5,16 @@
 #
 
 # On exit cleanup
-trap "cd /; umount 2>/dev/null /mnt/disk; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
+trap "cd /; umount 2>/dev/null /mnt/disk; umount 2>/dev/null /mnt/image; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
 set +H
 
 # Reboot hard
 do_reboot() {
     cd
+    umount /mnt/disk
+    umount /mnt/image
     umount /mnt/iso
     umount /mnt/net
-    umount /mnt/disk
 
     sleep 3
     trap "" EXIT
@@ -31,15 +32,16 @@ do_reboot() {
 # Restart installer
 do_restart() {
     cd /
+    umount 2>/dev/null /mnt/disk
+    umount 2>/dev/null /mnt/image
     umount 2>/dev/null /mnt/iso
     umount 2>/dev/null /mnt/net
-    umount 2>/dev/null /mnt/disk
     trap "" EXIT
     exec $0 $@
 }
 
 # Default args
-mkdir -p /mnt/net /mnt/iso /mnt/disk
+mkdir -p /mnt/net /mnt/iso /mnt/image /mnt/disk
 server=ask
 dir=ask
 image=ask
@@ -162,18 +164,37 @@ if mount -o loop,ro -t udf "$iso" /mnt/iso ; then :; else
     exit 1
 fi
 
-file="`echo /mnt/iso/*.bz2`"
-test -e "$file" || file="`echo /mnt/iso/*.gz`"
+d="/mnt/iso"
+file="`echo $d/*.squashfs`"
+if [ -e "$file" ] ; then
+    if mount -o loop,ro "$file" /mnt/image ; then :; else
+	echo "mounting $file on /mnt/image failed"
+	sleep 2
+	exit 1
+    fi
+    d="/mnt/image"
+fi
+/bin/sh
+
+file="`echo $d/*.bz2`"
+test -e "$file" || file="`echo $d/*.gz`"
+test -e "$file" || file="`echo $d/*.raw`"
 
 if [ ! -e "$file" ] ; then
-    /bin/ls -al /mnt/iso
+    /bin/ls -al $d
     echo "Cannot find compressed image in iso - exiting"
     sleep 2
     exit 1
 fi
 
-read sum1 blocks blocksize remain <"$file.md5"
-size=$(($blocks * $blocksize))
+md5="$file.md5"
+test -e "$file" || file="${file%.*}.md5"
+if [ -e "$md5" ] ; then
+    read sum1 blocks blocksize remain <"$md5"
+    size=$(($blocks * $blocksize))
+else
+    size=`stat -c %s "$file"`
+fi
 sizeM=$(($size / 1048576))
 echo ""
 echo ""
@@ -216,6 +237,7 @@ done
 case "$file" in
 *.bz2)	expand="bunzip2"	;;
 *.gz)	expand="gunzip"		;;
+*.raw)	expand="cat"		;;
 esac
 progress=""
 test -x /inst/dcounter -a "$sizeM" -gt 0 && progress='((/inst/dcounter -s $sizeM -l "" 3>&1 1>&2 2>&3 3>&- | perl -e '\''$|=1; while (<>) { /(\d+)/; print "$1\n" }'\'' | dialog --backtitle "$title" --no-shadow --stdout --gauge "$proginfo" 0 75 ) 2>&1) | '
