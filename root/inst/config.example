@@ -1,0 +1,16 @@
+# Auto-Update server directory URL
+update_url="http://xxx/"
+
+# Images and Scripts selection config
+# Example here; needs to be configured to local needs
+selection=(1 "Other (SLP/openSUSE/Fedora/etc.)" 2 "Some kiwi images")
+sel_script=("/inst/otheros.sh" x)
+sel_server=(x "myhost:/myexport/")
+sel_subdir=(x "myimages")
+
+# Override selection: Auto-select certain server and/or image
+#server=<server_and_directory_for_nfs>
+#dir=<subdir>
+#image=<name>
+#Known names for image: full file name, version, "latest", "ask"
+

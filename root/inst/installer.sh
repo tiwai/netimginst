@@ -1,8 +1,19 @@
 #!/bin/sh
 
 #
-# Init
+# Config
 #
+server=ask
+dir=ask
+image=ask
+# Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
+
+. /inst/config
+
+# Get args from boot line and addon commandline in /
+test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image='`
+eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image='`
+
 
 # On exit cleanup
 trap "cd /; umount 2>/dev/null /mnt/disk; umount 2>/dev/null /mnt/image; umount 2>/dev/null /mnt/iso; umount 2>/dev/null /mnt/net;" EXIT
@@ -40,20 +51,13 @@ do_restart() {
     exec $0 $@
 }
 
-# Default args
+
+#
+# Init
+#
+
 mkdir -p /mnt/net /mnt/iso /mnt/image /mnt/disk
-server=ask
-dir=ask
-image=ask
-# Known names for image: full file name, version, "latest", "ask" (actually, anyting not found)
 title="`cat /etc/ImageVersion`"
-
-# Known servers
-all_servers=(1 "berg:/data_build/   image" 2 "berg:/data/         released-images" 3 "hewson:/data        image" x "Other (SLP/openSUSE/Fedora/etc.)")
-
-# Get args from boot line and addon commandline in /
-test -e /cmdline && eval `tr ' ' '\n' </cmdline | grep '^server=\|dir=\|image='`
-eval `tr ' ' '\n' </proc/cmdline | grep '^server=\|dir=\|image='`
 
 # Get supposed harddisk
 # Find largest disk
@@ -100,7 +104,7 @@ net="${netdev:-[no net]} (${netspeed}Mb/s)"
 
 while ! mount -o ro,nolock $server /mnt/net ; do
     test "x$server" = xask || sleep 2
-    dialog 2>/tmp/selection --backtitle "$title" --no-shadow --cancel-label "Redetect Network" --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${all_servers[@]}"
+    dialog 2>/tmp/selection --backtitle "$title" --no-shadow --cancel-label "Redetect Network" --extra-label "" --inputmenu "Please select server:directory and subdirectory via $net" 0 75 15 "${selection[@]}"
     read n n2 server dir </tmp/selection
     case "$n" in
     "RENAMED")
@@ -108,15 +112,16 @@ while ! mount -o ro,nolock $server /mnt/net ; do
     "")
 	exit 1
 	;;
-    x)
-        trap "" EXIT
-	/inst/otheros.sh "$disk" && exit 0
-	(echo "Sleeping 10 seconds - Press Ctrl-C to continue"; sleep 10)
-        do_restart
-	;;
     *)
-	echo ${all_servers[$(($n * 2 - 1))]} >/tmp/selection
-	read server dir </tmp/selection
+	script=${sel_script[$(($n-1))]}
+	if [ "x$script" != x -a "x$script" != xx ] ; then
+	    trap "" EXIT
+	    $script "$disk" && exit 0
+	    (echo "Sleeping 10 seconds - Press Ctrl-C to continue"; sleep 10)
+	    do_restart
+	fi
+	server=${sel_server[$(($n-1))]}
+	dir=${sel_subdir[$(($n-1))]}
 	;;
     esac
 done

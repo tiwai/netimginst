@@ -1,0 +1,57 @@
+Network Image Installer
+=======================
+
+This kiwi image builable for CD and USB sticks enables to install systems
+directly via Network, independent of their version.
+
+It works through general installation sources via the "setupgrubfornfsinstall"
+script from Ludwig Nussel, or by dumping kiwi images reachable via nfs onto a
+harddrive. Beware, the later option nukes all partitions!
+
+It is capable of updating itself when newer versions are available.
+
+
+Building
+========
+
+1) Copy root/inst/config.example to root/inst/config and adapt it accordingly
+   (Auto-Update URL and list of image providers)
+   You might also want to adapt root/etc/ifcfg-wlan.template if you want to run
+   it using a wireless connection (this is not completely auto-configured yet).
+
+2) Call ./create_{usb,iso}.sh, according to taste.
+
+3) Deal with the resulting image:
+   Burn a CD (preferably CD-RW) / dump it on USB stick.
+   e.g. cdrecord Network_Image_Installer.i686-*.iso
+   e.g. dd bs=1M if=Network_Image_Installer.i686-*.raw of=/dev/sdc
+   Beware selecting the right sd* device. You may nuke your harddrive!
+
+
+Auto-Update
+===========
+
+The image is capable of auto-updating itself (only minor updates for CDs,
+anything for USB sticks).
+
+After selecting the network connection the image automatically loads
+$update_url/Changelog (same format as in this directory) to determine the
+latest version. If an update-*.tar.gz tarball exists for this version update, a
+minor update is started, which does not require a reboot, and is also possible
+with CD images (not persistent, of course).
+
+If a major update is required (USB stick only), it will download a complete
+image and dump it onto the USB stick itself. Do not power down or unplug the
+network connection or the USB stick during this process, it will leave your USB
+stick unbootable!
+
+For major updates, just copy the created image(s) and the Changelog to the auto-update directory that is reachable by $update_url from the config.
+
+For minor updates, you have to select the required files by hand. For example,
+2.4.5->2.4.6 only changed inst/installer.sh, so it's enough to "tar cvfz
+update-2.4.6.tar.gz inst/installer.sh" (inside root/), and to copy the
+resulting tarball and the Changelog to the auto-update directory.
+
+
+(c) 2010-2011 Matthias Hopf <mat@mshopf.de>
+
