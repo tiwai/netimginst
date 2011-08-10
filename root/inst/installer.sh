@@ -174,7 +174,6 @@ if [ -e "$file" ] ; then
     fi
     d="/mnt/image"
 fi
-/bin/sh
 
 file="`echo $d/*.bz2`"
 test -e "$file" || file="`echo $d/*.gz`"
