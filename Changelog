@@ -1,3 +1,10 @@
+2.4.6
+
+ * Nuke left-over debug debris
+ * Move configuration to external file in root/inst/config
+ * Add example config
+ * Add README
+
 2.4.5
 
  * Enable new kiwi images
