@@ -9,10 +9,16 @@ script from Ludwig Nussel, or by dumping kiwi images reachable via nfs onto a
 harddrive. Beware, the later option nukes all partitions!
 
 It is capable of updating itself when newer versions are available.
+Also, there are a number of root shells and support tools installed for
+diagnosis and repairing broken installations.
 
 
 Building
 ========
+
+0) zypper in kiwi kiwi-tools kiwi-doc kiwi-desc-isoboot kiwi-desc-oemboot
+   Currently NetworkImageInstaller will use Factory for testing, but builds
+   only on openSUSE 11.4, not Factory (YMMV).
 
 1) Copy root/inst/config.example to root/inst/config and adapt it accordingly
    (Auto-Update URL and list of image providers)
