@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.7" name="Network_Image_Installer">
+<image schemaversion="5.2" name="Network_Image_Installer">
 	<description type="system">
 		<author>Matthias Hopf</author>
 		<contact>mhopf@suse.de</contact>
 		<specification>Network image installer</specification>
 	</description>
 	<preferences>
-		<!-- <oem-swapsize>512</oem-swapsize> -->
-		<!-- default: usb image -->
-		<!-- <type image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3" lvm="true"> -->
-		<type image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-12.1" kernelcmdline="VGROUP=XXX">
-			<size>100</size>
+<!-- <oem-swapsize>512</oem-swapsize> -->
+<!-- default: usb image -->
+<!-- <type image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3" lvm="true"> -->
+		<type primary="true" image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.4">
+			<!--<size unit="M">100</size>-->
 			<oemconfig>
 				<oem-boot-title>Network Image Installer</oem-boot-title>
-				<oem-home>false</oem-home>
 			</oemconfig>
 			<split>
 				<temporary>
@@ -43,12 +42,10 @@
 					<file name="/etc/ImageVersion"/>
 				</persistent>
 			</split>
-			<lvmvolumes lvmgroup="niiVG"/>
+			<systemdisk name="niiVG"/>
 		</type>
-		<!-- addon: iso image -->
-		<type image="iso" flags="clic" boot="isoboot/suse-12.1">
-		    <!-- <size>100</size> -->
-		</type>
+<!-- addon: iso image -->
+		<type image="iso" flags="clic" boot="isoboot/suse-11.4"><!-- <size>100</size> --></type>
 		<version>2.5.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -145,7 +142,7 @@
 		<package name="lynx"/>
 		<package name="mdadm"/>
 		<package name="mingetty"/>
-		<package name='mkinitrd'/>
+		<package name="mkinitrd"/>
 		<package name="module-init-tools"/>
 		<package name="ncurses-utils"/>
 		<package name="net-tools"/>
@@ -187,7 +184,7 @@
 		<package name="wget"/>
 		<package name="ypbind"/>
 		<package name="zlib"/>
-		<!-- wireless related -->
+<!-- wireless related -->
 		<package name="atmel-firmware"/>
 		<package name="ipw-firmware"/>
 		<package name="kernel-firmware"/>
@@ -203,11 +200,11 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 	</packages>
-	<!--<repository type="yast2">
+<!--<repository type="yast2">
 		<source path="/mounts/machcd3/factory/stable-x86/"/>
 	</repository>-->
 	<repository type="yast2">
-		<!-- <source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/>-->
+<!-- <source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/>-->
 		<source path="http://download.opensuse.org/factory/repo/oss/"/>
 	</repository>
 </image>
