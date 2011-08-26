@@ -73,10 +73,10 @@ run_cmd "rm -rf build/root"
 run_cmd "mkdir -p build image"
 
 log='prepare.log'
-run_cmd "$kiwi --prepare . --root build/root --logfile $log" $log
+run_cmd "$kiwi --prepare . -t split --root build/root --logfile $log" $log
 
 log='create.log'
-run_cmd "$kiwi --create build/root -d image \
+run_cmd "$kiwi --create build/root -t split -d image \
                --logfile $log" $log
 
 base="image/Network_Image_Installer.i686-$vers"
