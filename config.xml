@@ -3,7 +3,7 @@
 <image schemaversion="5.2" name="Network_Image_Installer">
 	<description type="system">
 		<author>Matthias Hopf</author>
-		<contact>mhopf@suse.de</contact>
+		<contact>mat@mshopf.de</contact>
 		<specification>Network image installer</specification>
 	</description>
 	<preferences>
@@ -200,11 +200,8 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 	</packages>
-<!--<repository type="yast2">
-		<source path="/mounts/machcd3/factory/stable-x86/"/>
-	</repository>-->
 	<repository type="yast2">
 <!-- <source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/>-->
-		<source path="http://download.opensuse.org/factory/repo/oss/"/>
+		<source path="http://download.opensuse.org/factory-tested/repo/oss/"/>
 	</repository>
 </image>
