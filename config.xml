@@ -101,7 +101,7 @@
 		<package name="libelf1"/>
 		<package name="libexpat1"/>
 		<package name="libext2fs2"/>
-		<package name="libgcc46"/>
+		<package name="libgcc45"/>
 		<package name="libgcrypt11"/>
 		<package name="libgio-2_0-0"/>
 		<package name="libglib-2_0-0"/>
@@ -117,7 +117,6 @@
 		<package name="liblzma5"/>
 		<package name="libncurses5"/>
 		<package name="libncurses6"/>
-		<package name="libnet"/>
 		<package name="libnscd"/>
 		<package name="libopenct1"/>
 		<package name="libopenssl0_9_8"/>
@@ -126,7 +125,6 @@
 		<package name="libpopt0"/>
 		<package name="libpth20"/>
 		<package name="libreadline6"/>
-		<package name="librpcsecgss"/>
 		<package name="libselinux1"/>
 		<package name="libtirpc1"/>
 		<package name="libusb-0_1-4"/>
@@ -201,7 +199,7 @@
 		<package name="filesystem"/>
 	</packages>
 	<repository type="yast2">
-<!-- <source path="http://download.opensuse.org/distribution/11.3/repo/oss/"/>-->
-		<source path="http://download.opensuse.org/factory-tested/repo/oss/"/>
+		<source path="http://download.opensuse.org/distribution/11.4/repo/oss/"/>
+		<!--<source path="http://download.opensuse.org/factory-tested/repo/oss/"/>-->
 	</repository>
 </image>
