@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 . /etc/sysconfig/network/scripts/functions 2>/dev/null
 rm -f /tmp/net_device
