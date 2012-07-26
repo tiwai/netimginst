@@ -77,7 +77,7 @@
 # 20.10.2008: add mouse as usb tablet for qemu
 #             use pcnet as default network card for qemu. better performance it seems
 #
-# ... now in git: http://git.opensuse.org/?p=people/lnussel/setupgrubfornfsinstall.git;a=summary
+# ... now in git: http://gitorious.org/opensuse/setupgrubfornfsinstall
 
 
 # by Ludwig Nussel <lnussel@suse.de>
@@ -139,6 +139,9 @@ shellquote()
 	shift
 	for arg; do
 		echo -n ' '
+		if [ "$arg" != "${arg#-}" ]; then
+			echo -ne '\\\n\t'
+		fi
 		shellquote_one "$arg"
 	done 
 }
@@ -161,16 +164,22 @@ qemu_disk=
 qemu_disk_set=
 qemu_disk_size="10240"
 qemu_disk_type=raw
+qemu_virtio=
 have_qemu_img=
 qemu_mem=
 qemu_params=
 qemu_net_nic_mac=
 qemu_net_nic_model=
 qemu_net_type=user
+qemu_vga=
+qemu_vnc=
+qemu_vnc_display=
 qemu_image_dirs=(/space "/space/$USER" /abuild "/abuild/$USER" /var/tmp /tmp)
 localinstpath=
 parted=/usr/sbin/parted
 verify_signatures=
+keyring="/usr/lib/rpm/gnupg/pubring.gpg"
+insturl=
 
 helpandquit()
 {
@@ -187,6 +196,7 @@ OPTIONS:
 	--readonly	don't actually write files
 	--qemu[=binary]	use qemu
 	--qemu-disk=[file]  specify disk image for use with qemu
+	--url=URL       specify installation url directly
 EOF
 	exit 0
 }
@@ -222,6 +232,14 @@ while [ "$#" -gt 0 ]; do
 				shift
 			else
 				die "--qemu-disk requires an argument"
+			fi
+		;;
+		--url)
+			if [ -n "$arg" -a "$arg" = "${arg#-}" ]; then
+				insturl="$arg"
+				shift
+			else
+				die "--url requires an argument"
 			fi
 		;;
 		--help|-h) helpandquit ;;
@@ -320,7 +338,6 @@ kernelurl=
 kernellocal=
 initrdurl=
 initrdlocal=
-insturl=
 host=
 basepath=
 isfedora=
@@ -336,6 +353,22 @@ ifaces=()
 
 vncssh=
 
+if [ -z "$qemu" -a -e /dev/kvm ] && reqcmd -t qemu-kvm; then
+	if dialog "${bgt[@]}" --yesno "Would you like to use QEMU/KVM?" $h $w; then
+		qemu=1
+	fi
+fi
+
+checkreadonly()
+{
+	local file="$1"
+	if [ "$readonlymode" != yes -a ! -w "$file" ]; then
+		dialog "${bgt[@]}" --msgbox "$file not writeable!\nrunning in read only demo mode." $h $w || die
+		readonlymode=yes
+	fi
+}
+
+
 if [ -z "$qemu" ]; then
 	if which stat >/dev/null 2>&1; then
 		freemb=`stat -f -c '%f*%s' /boot`
@@ -347,6 +380,11 @@ if [ -z "$qemu" ]; then
 		unset freemb
 	fi
 
+	case "$bootloader" in
+		lilo|grub|grub2) ;;
+		*) bootloader='' ;;
+	esac
+
 	if [ -z "$bootloader" ]; then
 		dialog "${bgt[@]}" --msgbox "Unsupported bootloader, assuming grub in read only mode" $h $w || die
 		bootloader=grub
@@ -356,6 +394,7 @@ if [ -z "$qemu" ]; then
 	case "$bootloader" in
 		lilo)
 			bootloaderconf=/etc/lilo.conf
+			checkreadonly "$bootloaderconf"
 			;;
 		grub)
 			bootloaderconf=/boot/grub/menu.lst
@@ -364,13 +403,15 @@ if [ -z "$qemu" ]; then
 			if [ -z "$grubpartition" ]; then
 				 grubpartition=`awk '$1 == "gfxmenu" {if(match($2, /\((hd[[:digit:]]+,[[:digit:]]+)\)/,arr)) { print arr[0];exit}}' < /boot/grub/menu.lst`
 			fi
+			checkreadonly "$bootloaderconf"
+			;;
+		grub2)
+			reqcmd grub2-mkconfig
+			bootloaderconf="/etc/grub.d/99_setupgrubfornfsinstall"
+			checkreadonly "${bootloaderconf%/*}"
 			;;
 	esac
 
-	if [ "$readonlymode" != yes -a ! -w "$bootloaderconf" ]; then
-		dialog "${bgt[@]}" --msgbox "$bootloader config file not writeable!\nrunning in read only demo mode." $h $w || die
-		readonlymode=yes
-	fi
 else # qemu mode
 	if [ "$qemu" != 1 ]; then
 		reqcmd $qemu
@@ -648,27 +689,32 @@ mediatypedialog()
 		dialog "${bgt[@]}" --msgbox "Warning: The installation source does not provide GPG keys. YOU may not work because of this." $h $w || die
 	fi
 
+	local types=(0 HTTP 1 FTP)
 	if [ -z "$qemu" ]; then
-		dialog "${bgt[@]}" --menu "Choose Media Type" $h $w $mh 0 FTP 1 NFS 2 SLP 2> $TMPFILE || die
-		read ret < $TMPFILE
-	else
-		ret=0
+		types[${#types[@]}]="2"
+		types[${#types[@]}]="NFS"
+		types[${#types[@]}]="3"
+		types[${#types[@]}]="SLP"
 	fi
+
+	dialog "${bgt[@]}" --menu "Choose Media Type" $h $w $mh "${types[@]}" 2> $TMPFILE || die
+	read ret < $TMPFILE
 
 	case "$ret" in
 		0)
 			resolveordie "$host"
-			insturl=ftp://$ip/${instpath#*/*/}
+			insturl=http://$ip/${instpath#*/*/}
 		;;
 		1)
 			resolveordie "$host"
-			insturl=nfs://$ip$instpath
+			insturl=ftp://$ip/${instpath#*/*/}
 		;;
 		2)
-			insturl=slp
+			resolveordie "$host"
+			insturl=nfs://$ip$instpath
 		;;
 		3)
-			insturl=
+			insturl=slp
 		;;
 		*) die
 		;;
@@ -1003,13 +1049,18 @@ autodetecttypedialog()
 	i=$((i+1))
 
 	menu[$((i*2))]=$i
-	menu[$((i*2+1))]="fedora.redhat.com"
+	menu[$((i*2+1))]="Fedora"
 	cmds[$i]="greparch=0; isfedora=1; return 3"
 	i=$((i+1))
 
 	menu[$((i*2))]=$i
 	menu[$((i*2+1))]="Mandriva"
 	cmds[$i]="greparch=0; ismandriva=1; return 4"
+	i=$((i+1))
+
+	menu[$((i*2))]=$i
+	menu[$((i*2+1))]="Ubuntu"
+	cmds[$i]="greparch=0; isubuntu=1; return 5"
 	i=$((i+1))
 
 	menu[$((i*2))]=$i
@@ -1135,6 +1186,12 @@ qemu_disk_dialog()
 				qemu_disk_format_dialog
 			fi
 		fi
+
+		if dialog "${bgt[@]}" --yesno "Use virtio?" $h $w; then
+			qemu_virtio="yes"
+		else
+			qemu_virtio=''
+		fi
 		break
 	done
 }
@@ -1176,6 +1233,12 @@ qemu_net_dialog()
 	dialog "${bgt[@]}" --inputbox "qemu network type" $h $w $qemu_net_type 2> $TMPFILE || return
 	read qemu_net_type < $TMPFILE
 	: ${qemu_net_type:=user}
+}
+
+qemu_display_dialog()
+{
+	generic_list_dialog 'qemu_vga' "Choose Graphics Card" default cirrus std vmware qxl none
+	[ "$qemu_vga" != default ] || qemu_vga=
 }
 
 qemu_ram_dialog()
@@ -1262,7 +1325,7 @@ advancedoptionsdialog()
 		i=$((i+1))
 
 		menu[$((i*2))]=$i
-		menu[$((i*2+1))]="qemu disk image [$qemu_disk, ${qemu_disk_size}MB, ${qemu_disk_type}]"
+		menu[$((i*2+1))]="qemu disk image [$qemu_disk, ${qemu_disk_size}MB, ${qemu_disk_type}${qemu_virtio:+, virtio}]"
 		cmds[$i]="return 8"
 		i=$((i+1))
 
@@ -1270,6 +1333,11 @@ advancedoptionsdialog()
 		menu[${#menu[@]}]="qemu net opts [mac $qemu_net_nic_mac${qemu_net_nic_model:+, model $qemu_net_nic_model}, type ${qemu_net_type}]"
 		cmds[$i]="return 11"
 		i=$((i+1))
+
+#		menu[${#menu[@]}]="$i"
+#		menu[${#menu[@]}]="qemu graphics card [$qemu_vga]"
+#		cmds[$i]="return 12"
+#		i=$((i+1))
 
 		menu[$((i*2))]=$i
 		menu[$((i*2+1))]="qemu options [$qemu_params]"
@@ -1359,6 +1427,18 @@ kernelurl_from_insturl_fedora()
 	return 0
 }
 
+kernelurl_from_insturl_ubuntu()
+{
+	gui="" # TODO optionally set to gtk and append video=vesa:ywrap,mtrr vga=788
+	local subdir="/installer-i386/current/images/netboot$gui/ubuntu-installer/i386"
+	kernelurl="$insturl$subdir/linux"
+	initrdurl="$insturl$subdir/initrd.gz"
+	host=`echo "$insturl" | sed 's#^.*:/\+##;s#/.*##'`
+	baseurl="$insturl"
+
+	return 0
+}
+
 slpdialog()
 {
 	local i=0
@@ -1422,6 +1502,7 @@ opensuse_org_dialog()
 		i=$((i+1))
 #FIXME: move to external file
 	done <<-EOF
+	http://download.opensuse.org/distribution/12.1/repo/oss/ 12.1
 	http://download.opensuse.org/distribution/11.4/repo/oss/ 11.4
 	http://download.opensuse.org/distribution/11.3/repo/oss/ 11.3
 	http://download.opensuse.org/distribution/11.2/repo/oss/ 11.2
@@ -1468,6 +1549,9 @@ fedora_dialog()
 		i=$((i+1))
 #FIXME: move to external file
 	done <<-EOF
+	/releases/17/Fedora Fedora 17
+	/releases/16/Fedora Fedora 16
+	/releases/15/Fedora Fedora 15
 	/releases/14/Fedora Fedora 14
 	/releases/13/Fedora Fedora 13
 	/releases/12/Fedora Fedora 12
@@ -1484,12 +1568,51 @@ fedora_dialog()
 	insturl=${urls[$i]}
 
 	dialog "${bgt[@]}" --inputbox "Coose a mirror.\nsee http://mirrors.fedoraproject.org/publiclist/Fedora/" $h $w \
-		"http://download.fedora.redhat.com/pub/fedora/linux/" 2> $TMPFILE || die
+		"http://download.fedoraproject.org/pub/fedora/linux/" 2> $TMPFILE || die
 	read mirror < $TMPFILE
 
 	insturl="$mirror$insturl"
 
 	kernelurl_from_insturl_fedora
+	dist=${menu[$((i*2+1))]}
+}
+
+ubuntu_dialog()
+{
+	local i=0
+	local menu
+	local urls
+	local url
+	local retry=2
+	declare -a urls
+	declare -a menu
+	local mirror
+
+	while read url name; do
+		urls[${#urls[@]}]="$url"
+		menu[$((i*2))]=$i
+		menu[$((i*2+1))]="$name"
+		i=$((i+1))
+#FIXME: move to external file
+	done <<-EOF
+	precise Ubuntu 11.10 (Precise)
+	natty Ubuntu 11.04 (Natty)
+	natty Ubuntu 11.04 (Natty)
+	maverick Ubuntu 10.10 (Maverick)
+	lucid Ubuntu 10.04 (Lucid)
+	karmic Ubuntu 9.10 (Karmic)
+	jaunty Ubuntu 9.04 (Jaunty)
+	EOF
+
+	dialog "${bgt[@]}" --menu "Choose distribution" $h $w $mh "${menu[@]}" 2> $TMPFILE || die
+	i=0
+	read i < $TMPFILE
+	#insturl=http://archive.ubuntu.com/ubuntu/dists/${urls[$i]}/main/installer-i386/current/images/netboot
+	#isourl=$insturl/mini.iso
+	insturl=http://archive.ubuntu.com/ubuntu/dists/${urls[$i]}/main
+
+	kernelurl_from_insturl_ubuntu
+
 	dist=${menu[$((i*2+1))]}
 }
 
@@ -1552,7 +1675,16 @@ localinstall()
 	die 0
 }
 
-autodetecttypedialog 
+setexitcode()
+{
+	return $1
+}
+
+if [ -n "$insturl" ]; then
+	setexitcode 97
+else
+	autodetecttypedialog
+fi
 case "$?" in
 	0)
 		slpdialog
@@ -1574,6 +1706,14 @@ case "$?" in
 	4)
 		mandriva_dialog
 		verify_signatures=
+		;;
+	5)
+		ubuntu_dialog
+		verify_signatures=
+		;;
+	97)
+		kernelurl_from_insturl
+		verify_signatures=1
 		;;
 	98)
 		manualurldialog
@@ -1605,7 +1745,7 @@ if [ 0 = 1 ]; then
 	insturl=smb://10.0.2.4/qemu/${localinstpath##*/}
 fi
 
-if [ -z "$kernelurl" -o -z "$initrdurl" ]; then
+if [ \( -z "$kernelurl" -o -z "$initrdurl" \) -a -z "$isourl" ]; then
 	dialog "${bgt[@]}" --msgbox "No installation sources found" $h $w
 	die
 fi
@@ -1630,6 +1770,7 @@ while [ "$ret" != 0 ]; do
 		9) qemu_options_dialog ;;
 		10) dist_name_dialog ;;
 		11) qemu_net_dialog ;;
+		12) qemu_display_dialog ;;
 		99) bootparamdialog; break ;;
 		*) break ;;
 	esac
@@ -1638,9 +1779,15 @@ while [ "$ret" != 0 ]; do
 done
 
 if [ -n "$verify_signatures" ]; then
-	if [ ! -r /usr/lib/rpm/gnupg/pubring.gpg ]; then
-		dialog "${bgt[@]}" --msgbox "/usr/lib/rpm/gnupg/pubring.gpg is not installed. Signature check disabled." $h $w || die
-		verify_signatures=
+	if [ ! -r "$keyring" ]; then
+		if reqcmd -t gpg; then
+			keyring=`mktemp --tmpdir -q keyring-XXXXXX`
+			rpm -qia 'gpg-pubkey' | gpg --keyring="$keyring" --no-default-keyring --import || die
+			push_removeonexit "$keyring"
+		else
+			dialog "${bgt[@]}" --msgbox "$keyring or gpg is not installed. Signature check disabled." $h $w || die
+			verify_signatures=
+		fi
 	elif ! reqcmd -t gpgv; then
 		dialog "${bgt[@]}" --msgbox "gpgv is not available. Signature check disabled." $h $w || die
 		verify_signatures=
@@ -1663,27 +1810,50 @@ compare_sha1sum()
 {
 	local contentfile="$1"
 	local file="$2"
-	local havesha1="$3"
-	local s
+	local localfile="$3"
+	local checksum=''
+	local hashprog=''
+	local method=''
+	local refsum=''
+
 
 	while [ "${file:0:1}" = '/' ]; do
 		file="${file:1}"
 	done
 
-	s=`awk -v f="$file" '$1 == "HASH" && $2 == "SHA1" && $4 == f { print $3 }' <  "$contentfile"`
+	read method refsum < <(awk -v f="$file" '$1 == "HASH" && $4 == f { print $2, $3; end }' <  "$contentfile")
 
-	if [ -z "$s" ]; then
+	if [ -z "$method" -o -z "$refsum" ]; then
 		if [ -z "$skip_empty" ]; then
 			dialog "${bgt[@]}" $defaultno --yesno "No check sum available for $file. Can't verify integrity. Continue anyways?" $h $w || die
 			skip_empty=1
 		fi
-	elif [ "$s" != "$havesha1" ]; then
+		return 1
+	fi
+	case "$method" in
+		SHA1) hashprog=sha1sum ;;
+		SHA256) hashprog=sha256sum ;;
+		*) dialog "${bgt[@]}" $defaultno --yesno "Hash method $h for $file unsupported. Can't verify integrity. Continue anyways?" $h $w || die
+		;;
+	esac
+	read checksum dummy < <($hashprog "$localfile" 2>/dev/null)
+	if [ "$refsum" != "$checksum" ]; then
 		dialog "${bgt[@]}" $defaultno --yesno "Check sum of $file is corrupt. Continue anyways?" $h $w || die
 	fi
 }
 
+fetch_iso()
+{
+	echo "ISO: $isourl ..."
+	$echo $curl -f -o "$isolocal" "$isourl" || die
+}
+
 fetch_kernel()
 {
+	if [ -n "$isourl" ]; then
+		fetch_iso
+		return
+	fi
 	echo "Kernel: $kernelurl ..."
 	$echo $curl -f -o "$kernellocal" "$kernelurl" || die
 	echo "Initrd: $initrdurl ..."
@@ -1698,8 +1868,9 @@ fetch_kernel()
 		esac
 
 		case `file "$initrdlocal"` in
-			*gzip\ compressed\ data*initrd*) ;;
-			*gzip\ compressed\ data*)
+			*gzip\ compressed\ data*initrd*)
+			;;
+			*gzip\ compressed\ data*|*XZ\ compressed\ data)
 				if [ -z "$isfedora" -a -z "$ismandriva" ]; then
 					file_error_ask_continue "$initrdlocal"
 				fi
@@ -1725,26 +1896,18 @@ fetch_kernel()
 			fi
 		fi
 
-		local s1 s1 s3 dummy
-		read s1 dummy < <(sha1sum "$kernellocal" 2>/dev/null)
-		read s2 dummy < <(sha1sum "$initrdlocal" 2>/dev/null)
-		if [ -n "$splash" -a -f "$initrdlocal.splash" ]; then
-			read s3 dummy < <(sha1sum "$initrdlocal.splash" 2>/dev/null)
-		fi
-
 		if [ -n "$verify_signatures" ]; then
 			push_removeonexit "$kernellocal.content"
 			push_removeonexit "$kernellocal.content.asc"
-			if [ -n "$s1" -a -n "$s2" ] \
-				&& curlprobe "$baseurl/content" && curlprobe "$baseurl/content.asc" \
+			if curlprobe "$baseurl/content" && curlprobe "$baseurl/content.asc" \
 				&& $curl -s -f -o "$kernellocal.content" "$baseurl/content" \
 				&& $curl -s -f -o "$kernellocal.content.asc" "$baseurl/content.asc"; then
-				local gpgmsg=`gpgv -q --keyring=/usr/lib/rpm/gnupg/pubring.gpg "$kernellocal.content.asc" "$kernellocal.content" 2>&1`
+				local gpgmsg=`gpgv -q --keyring="$keyring" "$kernellocal.content.asc" "$kernellocal.content" 2>&1`
 				if [ "$?" -eq 0 ]; then
-					compare_sha1sum "$kernellocal.content" "${kernelurl#$baseurl}" "$s1"
-					compare_sha1sum "$kernellocal.content" "${initrdurl#$baseurl}" "$s2"
+					compare_sha1sum "$kernellocal.content" "${kernelurl#$baseurl}" "$kernellocal"
+					compare_sha1sum "$kernellocal.content" "${initrdurl#$baseurl}" "$initrdlocal"
 					if [ -n "$splash" ]; then
-						compare_sha1sum "$kernellocal.content" "${splash#$baseurl}" "$s3"
+						compare_sha1sum "$kernellocal.content" "${splash#$baseurl}" "$initrdlocal.splash"
 					fi
 				else
 					if [ -n "$gpgmsg" ]; then
@@ -1770,6 +1933,12 @@ echo
 
 create_libvirt_xml()
 {
+	local disk_dev="hda"
+	local disk_bus="ide"
+	if [ -n "$qemu_virtio" ]; then
+		disk_dev="vda"
+		disk_bus="virtio"
+	fi
 	cat <<EOF
 <domain type='kvm'>
   <name>$dist</name>
@@ -1791,7 +1960,7 @@ create_libvirt_xml()
     <disk type='file' device='disk'>
       <driver name='qemu' type='$qemu_disk_type'/>
       <source file='$qemu_disk'/>
-      <target dev='hda' bus='ide'/>
+      <target dev='$disk_dev' bus='$disk_bus'/>
     </disk>
 EOF
 if [ "$qemu_net_type" = 'user' ]; then
@@ -1810,19 +1979,64 @@ fi
 EOF
 }
 
+get_device_for_mp()
+{
+	awk -vmp="$1" '$2 == mp && substr($1,0,1) == "/" {print $1; exit}' /proc/mounts
+}
+
+gen_grub2_entry()
+{
+	if [ ! -e $bootloaderconf -o "$readonlymode" = yes ]; then
+		cat > $bootloaderconf <<-EOF
+		#!/bin/sh
+		exec tail -n +3 \$0
+		# installation entries created by setupgrubfornfsinstall
+		#
+		EOF
+		[ "$readonlymode" = yes ] || chmod 755 "$bootloaderconf"
+	fi
+	. /usr/share/grub/grub-mkconfig_lib
+
+	local loc
+	loc=`get_device_for_mp /boot`
+	[ -n "$loc" ] || loc=`get_device_for_mp /`
+	[ -n "$loc" ] || die "failed to determine root device"
+
+	title="Installation $host/$dist"
+
+	echo ''
+	echo "menuentry \"$title\" --class gnu-linux --class gnu --class os {" >> $bootloaderconf
+
+	prepare_grub_to_access_device "$loc" | sed -e 's/^/    /' >> $bootloaderconf
+
+	echo "    linux $grubpartition$kernellocal $bootparams" >> $bootloaderconf
+	echo "    initrd $grubpartition$initrdlocal" >> $bootloaderconf
+
+	echo "}" >> $bootloaderconf
+
+	return 0
+}
+
 if [ -n "$qemu" ]; then
 
 	kernellocal="$qemu_disk.install.kernel"
 	initrdlocal="$qemu_disk.install.initrd"
+	isolocal="$qemu_disk.install.iso"
 
 	fetch_kernel
 
 	qemu_prepare_disk
 
-	set -- -hda "$qemu_disk" -m $qemu_mem \
+	set -- -m $qemu_mem \
 		-net "nic${qemu_net_nic_mac:+,macaddr=$qemu_net_nic_mac}${qemu_net_nic_model:+,model=$qemu_net_nic_model}" \
 		-net "$qemu_net_type" \
 		 $qemu_params
+
+	if [ -n "$qemu_virtio" ]; then
+		set -- -drive file="$qemu_disk",if=virtio "$@"
+	else
+		set -- -hda "$qemu_disk" "$@"
+	fi
 
 	if [ "$readonlymode" = yes ]; then
 		script="/dev/stdout"
@@ -1839,7 +2053,11 @@ if [ -n "$qemu" ]; then
 	echo -ne '#!/bin/sh\nexec ' > "$script"
 	shellquote "$qemu" "$@" >> "$script"
 	echo ' "$@"'  >> "$script"
-	set -- $qemu -kernel "$kernellocal" -initrd "$initrdlocal" -append "$bootparams" "$@"
+	if [ -n "$isourl" ]; then
+		set -- $qemu "$@" -cdrom "$isolocal" -boot d
+	else
+		set -- $qemu -kernel "$kernellocal" -initrd "$initrdlocal" -append "$bootparams" "$@"
+	fi
 	echo -ne '#!/bin/sh\nexec ' > "$install_script"
 	shellquote "$@" >> "$install_script"
 	echo ' "$@"'  >> "$install_script"
@@ -1905,19 +2123,30 @@ else # regular setup with bootloader
 			echo "    kernel $grubpartition$kernellocal $bootparams" >> $bootloaderconf
 			echo "    initrd $grubpartition$initrdlocal" >> $bootloaderconf
 			;;
+
+		grub2)
+			(gen_grub2_entry) || die "grub2 config failed"
+			if [ "$readonlymode" != yes ]; then
+				if dialog "${bgt[@]}" --yesno "run grub2-mkconfig now?" $h $w; then
+					grub2-mkconfig > /boot/grub2/grub.cfg
+				else
+					echo "you need to run 'grub2-mkconfig > /boot/grub2/grub.cfg' manually"
+				fi
+			fi
+			;;
 	esac
 
 	if [ "$readonlymode" != yes ]; then
+		if [ "$bootloader" = "lilo" ]; then
+			dialog "${bgt[@]}" --msgbox "You need to run 'lilo' before rebooting" $h $w || die
+		fi
+
 		cat <<-EOF > $imagedir/kexec
 			#!/bin/sh
 			exec kexec -l --reset-vga --command-line="$bootparams" --initrd="$initrdlocal" -x $kernellocal
 		EOF
 		chmod 755 $imagedir/kexec
 		echo "kexec script generated as $imagedir/kexec"
-
-		if [ "$bootloader" = "lilo" ]; then
-			dialog "${bgt[@]}" --msgbox "You need to run 'lilo' before rebooting" $h $w || die
-		fi
 		echo "Done"
 	fi
 fi

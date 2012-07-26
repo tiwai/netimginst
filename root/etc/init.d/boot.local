@@ -14,5 +14,9 @@ fi
 # Remove persistent udev rules - breaks network on subsequent boots
 rm -f /etc/udev/rules.d/*-persistent-*.rules
 
+# ssh-keygen only allows 1024bit keys for DSA (fixed in openssh
+# update for openSUSE 12.1)
+#sed -i 's/-t dsa -b 2048/-t dsa -b 1024/g' /etc/init.d/sshd
+
 exit 0
 

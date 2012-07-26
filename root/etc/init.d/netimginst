@@ -1,0 +1,38 @@
+#!/bin/sh
+# Copyright (c) 2012 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# Author: Stefan Dirsch, 2012
+#
+# Please send feedback to http://www.suse.de/feedback
+#
+# /etc/init.d/netimginst
+#
+### BEGIN INIT INFO
+# Provides:       netimginst
+# Required-Start: $network
+# Required-Stop:  $network
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+# Short-Description: NII
+# Description:    Network Image Installer
+### END INIT INFO
+
+case "$1" in
+    start)
+	# do not start if already/still running
+	lines=$(ps a | grep "/bin/bash /inst/netimginst.sh" | grep -v grep | wc -l)
+	if [ $lines -lt 1 ]; then
+        	# start and switch to next available VT
+		export TERM=linux
+		export HOME=/root
+	        openvt -s /inst/netimginst.sh &
+	fi
+	;;
+    stop)
+	killall netimginst.sh
+	;;
+    *)
+	echo "Usage: $0 {start|stop}"
+	;;
+esac

@@ -1,7 +1,7 @@
 Network Image Installer
 =======================
 
-This kiwi image builable for CD and USB sticks enables to install systems
+This kiwi image buildable for CD and USB sticks enables to install systems
 directly via Network, independent of their version.
 
 It works through general installation sources via the "setupgrubfornfsinstall"
@@ -16,22 +16,22 @@ diagnosis and repairing broken installations.
 Building
 ========
 
-0) zypper in kiwi kiwi-tools kiwi-doc kiwi-desc-isoboot kiwi-desc-oemboot
-   Currently NetworkImageInstaller will use Factory for testing, and builds
-   only on Factory (YMMV).
-   NOTE: Building USB stick images is broken ATM!
+0) zypper in kiwi kiwi-tools kiwi-doc kiwi-desc-isoboot
+   Currently NetworkImageInstaller will use openSUSE 12.1 as Linux OS,
+   and builds only with kiwi-5.03.37 (shipped with openSUSE 12.1).
 
 1) Copy root/inst/config.example to root/inst/config and adapt it accordingly
    (Auto-Update URL and list of image providers)
    You might also want to adapt root/etc/ifcfg-wlan.template if you want to run
    it using a wireless connection (this is not completely auto-configured yet).
 
-2) Call ./create_{usb,iso}.sh, according to taste.
+2) Call ./create_iso.sh to create a hybrid ISO image, which can be written on
+   either a CD/DVD or a USB stick. 
 
 3) Deal with the resulting image:
    Burn a CD (preferably CD-RW) / dump it on USB stick.
    e.g. cdrecord Network_Image_Installer.i686-*.iso
-   e.g. dd bs=1M if=Network_Image_Installer.i686-*.raw of=/dev/sdc
+   e.g. dd bs=1M if=Network_Image_Installer.i686-*.iso of=/dev/sdc
    Beware selecting the right sd* device. You may nuke your harddrive!
 
 
@@ -61,4 +61,4 @@ resulting tarball and the Changelog to the auto-update directory.
 
 
 (c) 2010-2011 Matthias Hopf <mat@mshopf.de>
-
+(c) 2012 Stefan Dirsch <sndirsch@suse.de>

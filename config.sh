@@ -50,4 +50,9 @@ sed -i -e 's/^ENABLE_SYSRQ=.*/ENABLE_SYSRQ="yes"/' /etc/sysconfig/sysctl
 # Remove potentially available network configurations
 find /etc/sysconfig/network \( -name ifcfg-\* -a \! -name ifcfg-lo \) -exec rm \{\} \;
 
+# Create runlevel symlinks for Network Image Installer and inform systemctl
+# about this service
+/sbin/insserv -d netimginst
+/bin/systemctl enable netimginst.service
+
 true
