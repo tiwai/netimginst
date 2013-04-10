@@ -10,7 +10,7 @@
 <!-- <oem-swapsize>512</oem-swapsize> -->
 <!-- default: usb image -->
 <!-- <type image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-11.3" lvm="true"> -->
-		<type primary="true" image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-12.1">
+		<type primary="true" image="split" fsreadwrite="ext3" fsreadonly="squashfs" fsnocheck="true" boot="oemboot/suse-12.3">
 			<!--<size unit="M">100</size>-->
 			<oemconfig>
 				<oem-boot-title>Network Image Installer</oem-boot-title>
@@ -45,7 +45,7 @@
 			<systemdisk name="niiVG"/>
 		</type>
 <!-- addon: iso image -->
-		<type image="iso" flags="clic" boot="isoboot/suse-12.1" hybrid="true"><!-- <size>100</size> --></type>
+		<type image="iso" flags="clic" boot="isoboot/suse-12.3" hybrid="true"><!-- <size>100</size> --></type>
 		<version>2.5.0</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -62,7 +62,7 @@
 		<package name="autofs"/>
 		<package name="bash"/>
 		<package name="bind-utils"/>
-		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+<!--		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>-->
 		<package name="bzip2"/>
 		<package name="coreutils"/>
 		<package name="cpio"/>
@@ -101,7 +101,6 @@
 		<package name="libelf1"/>
 		<package name="libexpat1"/>
 		<package name="libext2fs2"/>
-		<package name="libgcc46"/>
 		<package name="libgcrypt11"/>
 		<package name="libgio-2_0-0"/>
 		<package name="libglib-2_0-0"/>
@@ -110,7 +109,6 @@
 		<package name="libgpg-error0"/>
 		<package name="libgssglue1"/>
 		<package name="libgthread-2_0-0"/>
-		<package name="libksba"/>
 		<package name="libldap-2_4-2"/>
 		<package name="libltdl7"/>
 		<package name="liblua5_1"/>
@@ -120,7 +118,6 @@
 		<package name="libnscd"/>
 		<package name="libopenct1"/>
 		<package name="libopenssl0_9_8"/>
-		<package name="libpcre0"/>
 		<package name="libpolkit0"/>
 		<package name="libpopt0"/>
 		<package name="libpth20"/>
@@ -131,9 +128,6 @@
 		<package name="libusb-1_0-0"/>
 		<package name="libuuid1"/>
 		<package name="libx86emu1"/>
-		<package name="libxcrypt"/>
-		<package name="libzio"/>
-		<package name="login"/>
 		<package name="logrotate"/>
 		<package name="lsof"/>
 		<package name="lvm2"/>
@@ -144,7 +138,6 @@
 		<package name="module-init-tools"/>
 		<package name="ncurses-utils"/>
 		<package name="net-tools"/>
-		<package name="netcat"/>
 		<package name="netcfg"/>
 		<package name="nfs-client"/>
 		<package name="nfsidmap"/>
@@ -181,7 +174,6 @@
 		<package name="vim"/>
 		<package name="wget"/>
 		<package name="ypbind"/>
-		<package name="zlib"/>
 <!-- wireless related -->
 		<package name="atmel-firmware"/>
 		<package name="ipw-firmware"/>
@@ -197,12 +189,14 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
+		<package name="module-init-tools"/>
+		<package name="udev"/>
 	</packages>
 	<repository type="yast2" priority="99">
-		<source path="http://download.opensuse.org/distribution/12.1/repo/oss/"/>
+		<source path="http://download.opensuse.org/distribution/12.3/repo/oss/"/>
 		<!--<source path="http://download.opensuse.org/factory-tested/repo/oss/"/>-->
 	</repository>
 	<repository type="rpm-md" priority="20">
-		<source path="http://download.opensuse.org/update/12.1/"/>
+		<source path="http://download.opensuse.org/update/12.3/"/>
 	</repository>
 </image>
