@@ -51,7 +51,7 @@ if [ "$installed_kiwi_ver" != "$kiwi_ver" ]; then
 fi
 
 # Check architecture (i686, x86_64).
-image_arch='i686'
+image_arch='x86_64'
 sys_arch=`uname -m`
 linux32=`which linux32 2>/dev/null`
 if [ "$image_arch" = 'i686' ] && [ "$sys_arch" = 'x86_64' ]; then
