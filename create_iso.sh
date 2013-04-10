@@ -79,7 +79,7 @@ log='create-iso.log'
 run_cmd "$kiwi --create build/root -t iso -d image \
                --logfile $log" $log
 
-base="image/Network_Image_Installer.i686-$vers"
+base="image/Network_Image_Installer.$image_arch-$vers"
 
 # Binary patch ISO (selected default)
 perl -e '
