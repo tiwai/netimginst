@@ -73,7 +73,7 @@ for n in $ifaces ; do
 	    ifup $n
 	    i=0
 	    while [ $i -lt 10 ] ; do
-		ping -c 1 www.suse.de && fix_net && break
+		ping -c 1 www.heise.de && fix_net && break
 		sleep 1
 		i=$(($i+1))
 	    done
@@ -116,7 +116,7 @@ for n in $ifaces ; do
     ifup $n
     i=0
     while [ $i -lt 10 ] ; do
-	ping -c 1 www.suse.de && fix_net && break
+	ping -c 1 www.heise.de && fix_net && break
 	sleep 1
 	i=$(($i+1))
     done
