@@ -37,7 +37,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Check kiwi version.
-kiwi_ver='kiwi-5.03.37-496.4.x86_64'
+kiwi_ver='kiwi-5.04.59-1.4.1.x86_64'
 installed_kiwi_ver=`rpm -q kiwi`
 if [ "$installed_kiwi_ver" != "$kiwi_ver" ]; then
   echo "'$kiwi_ver' expected, but '$installed_kiwi_ver' found."
