@@ -37,8 +37,18 @@ rm -rf /var/adm/backup/rpmdb/Packages-*
 rm /var/log/zypper.log
 
 # /usr/share/vim:24M /usr/share/cracklib
-rm -rf /usr/share/locale /usr/share/doc /usr/lib/locale
-
+# Delete non en-US locales
+for i in /usr/lib/locale/* /usr/share/locale/*; do
+   test -d "$i" || continue
+   case "${i##*/}" in
+       en_US*)
+	   ;;
+       *)
+	   rm -rf $i;;
+   esac
+done
+# rm -rf /usr/lib64/gconv /usr/lib/gconv
+rm -rf /usr/share/doc
 
 # Addapt bootloader config
 sed -i -e 's/ showopts/ showopts server=berg.suse.de:\/data_build dir=image image=ask/' /etc/sysconfig/bootloader
