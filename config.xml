@@ -195,6 +195,9 @@
 		<!--<source path="http://download.opensuse.org/factory-tested/repo/oss/"/>-->
 	</repository>
 	<repository type="rpm-md" priority="20">
+		<source path="http://download.opensuse.org/repositories/Kernel:/stable/standard/"/>
+	</repository>
+	<repository type="rpm-md" priority="20">
 		<source path="http://download.opensuse.org/update/12.3/"/>
 	</repository>
 </image>
