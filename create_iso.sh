@@ -50,6 +50,14 @@ if [ "$installed_kiwi_ver" != "$kiwi_ver" ]; then
   done
 fi
 
+# check whether pigz is available
+if [ -x /usr/bin/pigz ]; then
+    gzip_cmd="--gzip-cmd=pigz"
+    echo "Using pigz for compression"
+else
+    gzip_cmd=""
+fi
+
 # Check architecture (i686, x86_64).
 image_arch='x86_64'
 sys_arch=`uname -m`
@@ -73,11 +81,11 @@ run_cmd "rm -rf build/root"
 run_cmd "mkdir -p build image"
 
 log='prepare-iso.log'
-run_cmd "$kiwi --prepare . -t iso --root build/root --logfile $log" $log
+run_cmd "$kiwi --prepare . -t iso --root build/root --logfile $log $gzip_cmd" $log
 
 log='create-iso.log'
 run_cmd "$kiwi --create build/root -t iso -d image \
-               --logfile $log" $log
+               --logfile $log $gzip_cmd" $log
 
 base="image/Network_Image_Installer.$image_arch-$vers"
 
