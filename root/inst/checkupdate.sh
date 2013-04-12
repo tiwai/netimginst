@@ -61,7 +61,7 @@ if [ -e /inst/selfminorupdate.sh -a "${new%.*}" == "${vers%.*}" ] && curl -s -f 
     DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/selfminorupdate.sh '$new' /tmp/files.tar.gz"
     exit 0
 fi
-if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$update_url/$base$new.raw" > /dev/null ; then
+if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$update_url/$base$new.iso" > /dev/null ; then
     diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
     cat >/tmp/msg <<- EOUPDATE
 	A new major version update is available:  \\Z7\\Zb$new\\Zn  (current: $vers)
@@ -73,10 +73,10 @@ if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$update_url/
 	
 	EOUPDATE
     sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/bootstrap.sh /inst/selfupdate.sh '$update_url/$base$new.raw' '$owndisk'"
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/bootstrap.sh /inst/selfupdate.sh '$update_url/$base$new.iso' '$owndisk'"
     exit 0
 fi
-if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$update_url/$base${new%.*}.0.raw" > /dev/null ; then
+if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$update_url/$base${new%.*}.0.iso" > /dev/null ; then
     diskdef=`fdisk -l | sed -e "\\@^Disk $owndisk@"'!d;s/,.*//'`
     cat >/tmp/msg <<- EOUPDATE
 	A new major version update is available:  \\Z7\\Zb${new%.*}.0\\Zn  (current: $vers)
@@ -89,7 +89,7 @@ if [ -e /inst/selfupdate.sh -a "x$owndisk" != x ] && curl -f -s -I "$update_url/
 	
 	EOUPDATE
     sed -e "/^$vers/,\$d" </tmp/chlog >>/tmp/msg
-    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/bootstrap.sh /inst/selfupdate.sh '$update_url/$base${new%.*}.0.raw' '$owndisk'"
+    DIALOGRC=/inst/dialogrc-update dialog --colors --backtitle "$vers" --no-collapse --cr-wrap --yes-label "Update" --no-label "Continue" --defaultno --yesno "`head -18 /tmp/msg`" 23 75 && echo >$cmdfile "exec /inst/bootstrap.sh /inst/selfupdate.sh '$update_url/$base${new%.*}.0.iso' '$owndisk'"
     exit 0
 fi
 if [ -e /inst/selfminorupdate.sh ] && curl -s -f -o /tmp/files.tar.gz "$update_url/$tarbase${vers%.*}.$((${vers##*.}+1)).tar.gz" ; then
