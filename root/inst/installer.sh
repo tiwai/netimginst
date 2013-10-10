@@ -163,7 +163,7 @@ while [ ! -e "$iso" ] ; do
     iso="`echo *-$image.iso`"
 done
 
-if mount -o loop,ro -t udf "$iso" /mnt/iso ; then :; else
+if mount -o loop,ro "$iso" /mnt/iso ; then :; else
     echo "mounting $iso on /mnt/iso failed"
     sleep 2
     exit 1
