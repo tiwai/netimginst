@@ -133,7 +133,7 @@
 		<package name="lsof"/>
 		<package name="lvm2"/>
 		<package name="lynx"/>
-		<package name="mdadm"/>
+		<!-- <package name="mdadm"/> 12.3 version conflicts with Kernel:stable/mkinitrd -->
 		<package name="mingetty"/>
 		<package name="mkinitrd"/>
 		<package name="module-init-tools"/>
