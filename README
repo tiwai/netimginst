@@ -17,8 +17,8 @@ Building
 ========
 
 0) zypper in kiwi kiwi-tools kiwi-doc kiwi-desc-isoboot
-   Currently NetworkImageInstaller will use openSUSE 12.1 as Linux OS,
-   and builds only with kiwi-5.03.37 (shipped with openSUSE 12.1).
+   Currently NetworkImageInstaller will use openSUSE 12.3 as Linux OS,
+   and builds only with kiwi-5.04.82 (shipped with openSUSE 12.3).
 
 1) Copy root/inst/config.example to root/inst/config and adapt it accordingly
    (Auto-Update URL and list of image providers)
@@ -26,7 +26,7 @@ Building
    it using a wireless connection (this is not completely auto-configured yet).
 
 2) Call ./create_iso.sh to create a hybrid ISO image, which can be written on
-   either a CD/DVD or a USB stick. 
+   either a CD/DVD or a USB stick.
 
 3) Deal with the resulting image:
    Burn a CD (preferably CD-RW) / dump it on USB stick.
