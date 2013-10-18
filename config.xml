@@ -175,6 +175,7 @@
 		<package name="vim"/>
 		<package name="wget"/>
 		<package name="ypbind"/>
+		<package name="parted"/>
 <!-- wireless related -->
 		<package name="atmel-firmware"/>
 		<package name="ipw-firmware"/>
